@@ -1,0 +1,130 @@
+/*
+Designer: Xatai
+Site: Xpert.az
+Facebook: https://fb.com/xetai.isayev
+*/
+
+@media only screen and (max-width:1090px) {
+.centered {width:100%; padding:0 10px;}
+.ru .top-menu .top-menu-wrap ul li a {padding: 0 7px;}
+.search {right:46px; left:10px;}
+.a-posts {padding: 7px 10px;}
+}
+@media only screen and (max-width:1060px) {
+.fxd .news-block-wrap .news-block-item {width:33.3333333333%;}
+}
+@media only screen and (min-width:1000px) {
+.top-menu {display:block !important;}
+}
+@media only screen and (max-width:1000px) {
+.header-top, .header .x-b {display:none;}
+.header .header-m-left, .header .header-m-right {padding:12px 0;}
+.header .logo { position: absolute; top: 7px; left: 34px; right: 34px; text-align: center; height: 46px; padding: 0;}
+.header .logo a {display:inline-block; vertical-align:top; padding:0;}
+.header .logo img {height:46px;}
+.top-menu {background-color: #2b2a29;padding: 30px 5px 5px 5px;width: 100%;position: fixed;top: 0;right: 0;z-index: 99999999;height: 100%;overflow: hidden;overflow-y: auto;transition: left .4s;left:-100%;}
+.top-menu.open {left:0;}
+.top-menu .top-menu-wrap ul li {width:100%; text-align:center; float:none;     border-bottom: 1px solid rgba(255, 255, 255, 0.1);}
+.top-menu .top-menu-wrap ul li a:hover {background-color:transparent; color: #dc251f} 
+.ru .top-menu .top-menu-wrap ul li a:hover {background-color:transparent; color: #00a0e3} 
+.top-menu .top-menu-wrap ul li a {padding: 0 10px; color: #fff;}
+.mobil-menu, .mobil-menu-close {display:block;}
+.top-menu .h-social {display:block;}
+.search {padding:8px 0;}
+.search-icon {top:-48px; right:10px;}
+.search-icon:before {background-image: url(../images/search2.svg);}
+.top-menu .top-menu-wrap ul li.has-sub {display:none;}
+.top-menu .top-menu-wrap ul li.show-mob {display:block;}
+.header .header-m-right .mobil-language {display:block; padding-right: 35px; position:relative; z-index:10;}
+.a-posts, .top-news {display:none;}
+.m-slider {width:100%; float:none;}
+.xt {display:none}
+.m-slider-item .m-slider-image img {min-height:242px;}
+}
+@media only screen and (max-width:960px) {
+.main-slider {float:none; width:100%; padding:0; margin-bottom:20px;}
+.side-list {display:none;}
+.news-block-wrap .news-block-item {width:50%;}
+.fxd .news-block-wrap .news-block-item {width:50%;}
+.page-left, .page-right {width:100%; float:none;}
+}
+@media only screen and (max-width:850px) {
+.f-social {position:relative; float:left;}
+}
+@media only screen and (max-width:700px) {
+.thumbs, .m-slider-extra .m-slider-details {display:none;}
+.m-slider-info .m-slider-title {font-size:22px; line-height:26px;}
+.m-slider .owl-dots {display:block;}
+}
+.m-slider-extra .m-slider-date {padding:0;}
+@media only screen and (max-width:670px) {
+
+.footer .footer-left {width:100%; float:none; text-align:center; clear:both;}
+.footer .footer-right {float:none; width:100%; margin-bottom:22px;}
+.f-social ul li {margin: 0 10px 0 0;}
+.site-counter {margin-left:15px;}
+}
+@media only screen and (max-width:640px) {
+.nav-1 .owl-nav {opacity:0.3;}
+.nav-1 .owl-nav [class*='owl-'] {background-color: transparent; padding: 10px 3px;}
+.dot-1 .owl-dots {display:none;}
+.nav-1:hover .owl-nav {opacity:1;}
+.main-slider-info {padding:20px;}
+.main-slider-info .main-slider-category {padding: 0 7px; font-size:13px; height:20px; line-height:20px; margin-bottom:10px;}
+.main-slider-info .main-slider-title {font-size:22px; margin-bottom:10px; line-height: 1.42;}
+.main-slider-info .main-slider-date {font-size:12px; line-height:16px; height:16px;}
+
+}
+@media only screen and (max-width:620px) {
+.main-slider-info .main-slider-date i {margin: 2px 5px 0 0;}
+.news-block-wrap .news-block-item {width:100% !important;}
+.fxd .news-block-wrap .news-block-item {width:100% !important;}
+}
+@media only screen and (max-width:580px) {
+.full-post-a {margin-left:0; padding:0 10px;}
+.full-post-image {margin: 0 -10px;}
+.full-post-i {position: static; width: auto; margin-bottom: 15px; background-color: #eee; overflow: hidden; margin: 0 -10px 15px;}
+.dt.full-post-date {float: left; color: #909090; text-shadow: 1px 1px 1px #fff; font-size: 12.3px; padding: 2px 5px; background-color: transparent; line-height: 20px; }
+.respico {display:block;}
+.respdate { display: block; float: left; text-align: left;}
+.month, .year, .time {display:none;}
+.full-post-view {float: right; height: 24px; border: none; background-color: transparent; padding: 2px 5px 2px 10px; margin-bottom: 0;}
+.full-post-view .view-wrap i {width: 16px; height: 16px; margin: 2px 5px 2px 0;}
+.full-post-view .view-wrap span {max-width: none; font-size: 12.3px; line-height: 20px;}
+.socialpanel {position: fixed; left: 0; bottom: 0; width: 100%; z-index: 99; opacity: .95;}
+.socialpanel ul li {width: 25%;}
+.counter-s {display:none;}
+}
+@media only screen and (max-width:560px) {
+.full-post-info .f-like {margin: 0 0 15px 0; clear: both; float: none; text-align: center;}
+}
+@media only screen and (max-width:520px) {
+.main-slider-info {padding: 15px 12px;}
+.main-slider-info .main-slider-title {font-size:20px;}
+.m-slider-info .m-slider-title {font-size:20px; line-height:24px;}
+.m-slider-item .m-slider-info {padding: 15px 12px 20px;}
+}
+@media only screen and (max-width:480px) {
+.footer .footer-right {width:100%; float:none; text-align:center;}
+.fc {display:inline-block; vertical-align:top; float:none;}
+.footer .footer-menu {float:none; width:100%; text-align:center; margin-bottom:22px;}
+.footer .footer-menu ul {display:inline-block; vertical-align:top;}
+.footer .footer-menu ul li {margin:0 10px;}
+.header .logo {right:70px;}
+}
+@media only screen and (max-width:420px) {
+.main-slider .main-slider-item img {height:242px; object-fit:cover;}
+.main-slider-info {padding: 12px 10px;}
+.main-slider-info .main-slider-category {font-size:11px; padding:0 6px; margin-bottom:8px;}
+.main-slider-info .main-slider-title {font-size:18px;}
+.m-slider-info .m-slider-title {font-size:18px; line-height:22px;}
+.m-slider-item .m-slider-info {padding: 12px 10px 20px;}
+}
+
+
+@media only screen and (max-width:380px) {
+.header .logo, .header .logo img {height:40px;}
+.header .header-m-left, .header .header-m-right {padding:9px 0;}
+.search-icon {top:-45px;}
+
+}
