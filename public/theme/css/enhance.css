@@ -107,3 +107,12 @@
   .m-slider-wrap.owl-carousel, .m-slider-wrap .m-slider-item .m-slider-image img {height: 260px;}
 }
 
+
+/* ---------- Side banners (ainsyndication 160x600), only where they fit beside the 1280px layout ---------- */
+.xsayt {position: relative;}
+.reklamsol, .reklamsag {display: none; position: absolute; top: 216px; width: 160px; height: 600px; z-index: 1;}
+.reklamsol {right: 50%; margin-right: 655px;}
+.reklamsag {left: 50%; margin-left: 655px;}
+@media only screen and (min-width: 1660px) {
+  .reklamsol, .reklamsag {display: block;}
+}

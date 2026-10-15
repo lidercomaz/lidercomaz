@@ -38,6 +38,8 @@ interface SiteText {
   searchEmpty: string
   notFound: string
   adPlaceholder: string | null
+  /** ainsyndication slot for the desktop side banners (original main.tpl), null = no ads */
+  sideAdSlot: string | null
   footer: {
     about: string
     sectionsTitle: string
@@ -112,6 +114,7 @@ export const SITE: Record<Lang, SiteText> = {
     searchEmpty: 'Heç nə tapılmadı.',
     notFound: 'Səhifə tapılmadı',
     adPlaceholder: null,
+    sideAdSlot: '9236',
     footer: {
       about: 'Lider.com.az – müstəqil xəbər portalı. Azərbaycan və dünyada baş verən siyasi, iqtisadi, sosial, mədəni və idman hadisələrini operativ və qərəzsiz şəkildə oxuculara çatdırır.',
       sectionsTitle: 'Bölmələr',
@@ -214,6 +217,7 @@ export const SITE: Record<Lang, SiteText> = {
     searchEmpty: 'Ничего не найдено.',
     notFound: 'Страница не найдена',
     adPlaceholder: null,
+    sideAdSlot: null,
     footer: {
       about: 'Lider.com.az – независимый новостной портал. Оперативно и беспристрастно освещает политические, экономические, социальные, культурные и спортивные события в Азербайджане и мире.',
       sectionsTitle: 'Разделы',
