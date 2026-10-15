@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ContentPage } from '@/components/ContentPage'
 import { LoadMore } from '@/components/LoadMore'
@@ -20,6 +21,17 @@ export async function resolve(lang: Lang, segment: string) {
   const cats = await data.categories(lang)
   const category = cats.find((c) => c.slug === slug)
   return category ? ({ kind: 'category', category, cats } as const) : null
+}
+
+export async function categoryMetadata(lang: string, segment: string, pageNo = 1): Promise<Metadata> {
+  if (!isLang(lang)) return {}
+  const r = await resolve(lang, segment)
+  if (!r) return {}
+  if (r.kind === 'page') return { title: r.page.title }
+  return {
+    title: pageNo > 1 ? `${r.category.name} – ${pageNo}` : r.category.name,
+    description: r.category.description ?? undefined,
+  }
 }
 
 /** Shared with /{category}/page/{n}/ (DLE pagination urls). */

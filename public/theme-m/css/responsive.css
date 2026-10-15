@@ -1,0 +1,97 @@
+/*
+Designer: Xatai
+Site: Xpert.az
+Facebook: https://fb.com/xetai.isayev
+*/
+
+@media only screen and (max-width:840px) {
+.footer-top .social {float:right;}
+.footer-top .f-links {float:left; clear:both; overflow:hidden; padding: 20px 0 10px;}
+.footer-top .f-links ul li {margin: 0 44px 0 0;}
+.footer-top .counter {padding: 13px 0 6px;}
+}
+@media only screen and (max-width:700px) {
+
+}
+@media only screen and (max-width:630px) {
+.p-title {margin-left:10px;}
+.posts {padding: 30px 0;}
+.posts-wrap {margin: 0 -10px;}
+.posts-wrap .post {padding: 0 10px; margin-bottom:20px;}
+.posts-wrap .post a {border-radius:0;}
+.posts.tabs {padding: 15px 10px 18px 10px;}
+.category .posts, .posts.related {padding:0;}
+.h-title, .c-title {padding-left:10px;}
+.static-page-content {padding: 0 10px;}
+.full-post-w {padding: 0;}
+.full-post-w .full-post-image {border-radius:0;}
+.full-post-w .full-post-extra {padding:10px;}
+.full-post-w .full-post-content {padding: 10px 10px 0 10px;}
+.top-menu {padding:20px 0 40px;}
+.top-menu .top-menu-col {padding-left: 5%;}
+.mg-menu {padding-left:5%; padding-bottom: 20px;}
+.top-menu-col ul li a {font-size: 22px; line-height:30px;}
+.f-menu ul li a {font-size:20px; line-height:24px;}
+.posts-tab-header.subs {padding: 0 10px 20px}
+.mg-menu .mg-list a {font-size:18px; line-height:26px;}
+.full-post-w .full-post-content .xtr {margin-top:10px;}
+}
+@media only screen and (max-width:580px) {
+.main-slider-info .main-slider-title {font-size:24px; line-height:30px; max-height:90px;}
+.main-slider-wrap .owl-nav>button {margin-top:-70px;}
+.posts-wrap .post {width:100%;}
+.post-like .pl {margin-bottom:13px;}
+.full-post-bottom .post-source {float: none; max-width: none; padding: 0px 0px 20px 0;}
+.full-post-w .full-post-bottom {padding: 15px 0 20px 0; text-align:center;}
+.full-post-bottom .full-post-share {float: none; clear: both; overflow: hidden; display: inline-block; vertical-align: top;}
+.c-title h2 {font-size:32px; line-height:40px; margin-bottom:20px;}
+}
+@media only screen and (max-width:560px) {
+.full-post-extra .fl.f-date {clear:both;}
+.full-post-extra .f-size {margin-top:0px;}
+.full-post-extra .fl.f-view {position: absolute; right: 10px; margin-right: 0; top: 10px;}
+}
+@media only screen and (max-width:480px) {
+.footer-bottom .cp {float:none; padding-right:0;}
+.footer-bottom .cr {padding: 10px 0 6px; float: none;}
+.footer-bottom .cr img {margin:0 auto;}
+.menu-top {padding:13px 10px;}
+.top-menu-col ul li {padding-bottom:15px;}
+.top-menu-col ul li a {font-size: 16px; line-height:24px; padding: 0 0 0 15px;}
+.menu-a {bottom:44px;}
+.f-menu {padding-bottom:10px;}
+.f-menu ul li {margin: 0 10px;}
+.f-menu ul li a {font-size:15px; line-height:20px;}
+.mg-menu .mg-title {font-size:20px; line-height:24px; height:24px; padding-left: 24px; margin-bottom:12px;}
+.mg-menu .mg-title:before {width:24px; height:24px; background-size:cover;}
+.mg-menu .mg-list a {font-size:14px; line-height:22px; padding-right:20px;}
+}
+@media (min-aspect-ratio: 4/3) {
+.menu-a {position:static;}
+.f-menu {position: static; margin-top:30px;}
+}
+@media only screen and (max-width:460px) {
+.main-slider-info .main-slider-title {font-size:20px; line-height:26px; max-height:104px;}
+.main-slider-image .main-slider-extra {bottom:15px;}
+.main-slider-wrap .owl-nav>button {margin-top:-76px;}
+.posts-tab-wrap .posts-tab-header .p-tab, .posts-tab-wrap .posts-tab-header .sub-tab {font-size: 14px; padding: 6px 15px;}
+.h-title h2 {font-size:30px; line-height:38px;}
+.h-title.min h2 {font-size:28px; line-height:36px; overflow:hidden; text-overflow:ellipsis; white-space: nowrap;}
+.full-post-content .full-post-title {font-size:26px; line-height:32px;}
+.footer-top .f-links {float:none; text-align:center;}
+.footer-top .f-links ul {display:inline-block; vertical-align:top;}
+.footer-top .f-links ul li {margin: 0 15px;}
+.footer-top .counter {clear:both; float:none; text-align: center;}
+.footer-top .counter a {display:inline-block; vertical-align:top;}
+}
+@media only screen and (max-width:380px) {
+.posts-tab-wrap .posts-tab-header .p-tab, .posts-tab-wrap .posts-tab-header .sub-tab { font-size: 13.5px; padding: 5px 10px;
+}
+@media only screen and (max-width:344px) {
+.footer-top .logo {margin-right:0;}
+.social ul li a {margin-left:3px;}
+}
+@media only screen and (max-width:336px) {
+.footer-top .f-links ul li {margin: 0 12px;}
+.full-post-share .share-box ul li {margin-left:16px;}
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="close-line" width="24" height="24" viewBox="0 0 24 24">
+    <defs>
+        <style>
+            .cls-1{fill:none}.cls-2{fill:#fff}
+        </style>
+    </defs>
+    <path id="Path_48" d="M0 0h24v24H0z" class="cls-1" data-name="Path 48"/>
+    <path id="Path_49" d="M14 12.142l6.506-6.506 1.859 1.859L15.86 14l6.506 6.506-1.859 1.859L14 15.86l-6.505 6.506-1.859-1.859L12.142 14 5.636 7.495l1.859-1.859z" class="cls-2" data-name="Path 49" transform="translate(-2 -2)"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+    <defs>
+        <linearGradient id="prefix__linear-gradient" x1=".5" x2=".5" y2="1" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#f37b1d"/>
+            <stop offset="1" stop-color="#d02873"/>
+        </linearGradient>
+    </defs>
+    <g id="prefix__ins" transform="translate(-1098 -33)">
+        <path id="prefix__Rectangle_7" d="M0 0H30V30H0z" data-name="Rectangle 7" transform="translate(1098 33)" style="fill:none"/>
+        <g id="prefix__Layer_2" transform="translate(1103.742 38.738)">
+            <path fill="url(#prefix__linear-gradient)" id="prefix__Path_6" d="M12.9 26.523h8.76a4.95 4.95 0 0 0 4.9-4.978v-8.567A5.008 5.008 0 0 0 21.622 8H12.9A4.95 4.95 0 0 0 8 12.978v8.567a4.95 4.95 0 0 0 4.9 4.978zm9.763-15.436a1.158 1.158 0 1 1-1.119 1.158 1.129 1.129 0 0 1 1.12-1.158zm-5.4 1.544a4.632 4.632 0 1 1-4.515 4.631 4.571 4.571 0 0 1 4.514-4.631z" data-name="Path 6" transform="translate(-8 -8)"/>
+        </g>
+    </g>
+</svg>

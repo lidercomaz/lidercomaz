@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+    <defs>
+        <linearGradient id="prefix__linear-gradient" x1=".5" x2=".5" y2="1" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#3e5b92"/>
+            <stop offset="1" stop-color="#1c3366"/>
+        </linearGradient>
+    </defs>
+    <g id="prefix__fb" transform="translate(-926 -33)">
+        <path id="prefix__Rectangle_5" d="M0 0H30V30H0z" data-name="Rectangle 5" transform="translate(926 33)" style="fill:none"/>
+        <g id="prefix__Layer_2" transform="translate(935.723 37.455)">
+            <path fill="url(#prefix__linear-gradient)" id="prefix__Path_2" d="M18.79 16.168h1.28a.243.243 0 0 1 .226.226v8.054a.755.755 0 0 0 .753.753h2.935a.755.755 0 0 0 .753-.753v-8.054a.243.243 0 0 1 .226-.226h2.107a.738.738 0 0 0 .753-.64l.489-2.935a.794.794 0 0 0-.753-.9h-2.484a.337.337 0 0 1-.339-.339V9.469a.676.676 0 0 1 .753-.753h2.22a.755.755 0 0 0 .753-.753v-3.01a.755.755 0 0 0-.752-.753h-2.672c-4.892 0-4.78 3.952-4.78 4.516v2.747a.243.243 0 0 1-.226.226h-1.28a.755.755 0 0 0-.753.753v2.935a.82.82 0 0 0 .791.791z" data-name="Path 2" transform="translate(-18 -4.2)"/>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+    <g id="prefix__fire-line" transform="translate(-.37)">
+        <path id="prefix__Path_76" d="M0 0h30v30H0z" data-name="Path 76" transform="translate(.37)" style="fill:none"/>
+        <path id="prefix__Path_73" d="M13.875 28.375A9.375 9.375 0 0 0 23.25 19a9.413 9.413 0 0 0-.625-3.088Q19.5 19 17.875 19c4.994-8.75 2.25-12.5-5.25-17.5.625 6.25-3.495 9.092-5.172 10.671a9.375 9.375 0 0 0 6.423 16.2zm.887-22.206c4.051 3.438 4.071 6.109.941 11.592a2.5 2.5 0 0 0 2.172 3.739 5.563 5.563 0 0 0 2.649-.744 6.875 6.875 0 1 1-11.359-6.765c.158-.148.956-.856.991-.888.53-.475.966-.9 1.4-1.357a13.1 13.1 0 0 0 3.208-5.577z" data-name="Path 73" transform="translate(1.033 .375)" style="fill:#f01111"/>
+    </g>
+</svg>

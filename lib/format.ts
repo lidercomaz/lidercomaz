@@ -28,6 +28,12 @@ export function formatDate(iso: string, lang: Lang) {
   return `${Number(d)}-${m}-${y}, ${H}:${i}`
 }
 
+/** DLE {date=j.m.Y, H:i}: "15.10.2026, 10:16" */
+export function formatDotted(iso: string) {
+  const { y, m, d, H, i } = parts(iso)
+  return `${d}.${m}.${y}, ${H}:${i}`
+}
+
 export function formatTime(iso: string) {
   const { H, i } = parts(iso)
   return `${H}:${i}`

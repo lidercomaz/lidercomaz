@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="facebook-fill" width="26" height="26" viewBox="0 0 26 26">
+    <defs>
+        <style>
+            .cls-1{fill:none}.cls-2{fill:#fff}
+        </style>
+    </defs>
+    <path id="Path_5" d="M0 0h26v26H0z" class="cls-1" data-name="Path 5"/>
+    <path id="Path_6" d="M14.583 14.458h2.708l1.083-4.333h-3.791V7.958c0-1.116 0-2.167 2.167-2.167h1.625V2.152A30.513 30.513 0 0 0 15.28 2a4.7 4.7 0 0 0-5.03 5.092v3.033H7v4.333h3.25v9.208h4.333z" class="cls-2" data-name="Path 6" transform="translate(.583 .167)"/>
+</svg>

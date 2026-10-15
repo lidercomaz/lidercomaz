@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { langFromHost } from './lib/request'
+import { isMobileUA, langFromHost } from './lib/request'
 
 export function proxy(req: NextRequest) {
   const url = req.nextUrl.clone()
@@ -13,10 +13,12 @@ export function proxy(req: NextRequest) {
   const lang = langFromHost(req.headers.get('host'))
   // "sitemap.xml" is a reserved Next.js file name, so the route lives at /[lang]/sitemap-xml.
   const path = url.pathname === '/sitemap.xml' ? '/sitemap-xml' : url.pathname
-  url.pathname = `/${lang}${path === '/' ? '' : path}`
+  // Phones get the smartphone template (app/m/...) on the same public url.
+  const mobile = isMobileUA(req.headers.get('user-agent')) && !path.startsWith('/sitemap-xml') && !/^\/(rss\.xml|robots\.txt)$/.test(path)
+  url.pathname = `${mobile ? '/m' : ''}/${lang}${path === '/' ? '' : path}`
   return NextResponse.rewrite(url)
 }
 
 export const config = {
-  matcher: ['/((?!_next/|api/|theme/|favicon.ico).*)'],
+  matcher: ['/((?!_next/|api/|theme/|theme-m/|favicon.ico).*)'],
 }

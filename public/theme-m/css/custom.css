@@ -1,0 +1,16 @@
+/* Additions for the Next.js port of the DLE smartphone template. */
+html {background:#ebeff2; color-scheme: light;}
+.m-ad-placeholder {color:#444; background:#f1f1f1; text-align:center; padding:10px; border-radius:4px; font-weight:bold; margin:5px 0; font-size:20px;}
+.red-title {color: red;}
+.main-slider-wrap .owl-stage {display:flex;}
+.main-slider-wrap .owl-item {flex: 0 0 auto;}
+.main-slider-item .main-slider-image img {width:100%;}
+.full-post-article img {max-width:100%; height:auto; display:block; margin: 0 auto 10px;}
+.full-post-article iframe {max-width:100%; width:100%; aspect-ratio:16/9; height:auto; border:0;}
+.full-post-title {font-weight:bold;}
+.f-size li {cursor:pointer;}
+.nav-load {text-align:center; padding:10px 0 15px; clear:both;}
+.nav-load button {padding:0 18px; height:36px; border-radius:18px; font-weight:600; font-size:15px; background-color:#303f50; color:#fff; border:0; cursor:pointer;}
+.nav-load button:disabled {opacity:.6;}
+.bottom-nav {clear:both;}
+.m-empty {padding:10px;}

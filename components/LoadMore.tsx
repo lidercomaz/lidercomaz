@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { MPostItem } from './m/MPostItem'
 import { NewsItem, type CardWithHref } from './NewsItem'
 
 interface Props {
@@ -9,10 +10,13 @@ interface Props {
   pageSize: number
   categoryId?: number
   query?: string
+  /** 'm' renders smartphone-template cards */
+  variant?: 'm'
 }
 
 /** Replaces DLE "Daha çox" ajax navigation / infinite scroll. */
-export function LoadMore({ label, offset: initial, pageSize, categoryId, query }: Props) {
+export function LoadMore({ label, offset: initial, pageSize, categoryId, query, variant }: Props) {
+  const Item = variant === 'm' ? MPostItem : NewsItem
   const [items, setItems] = useState<CardWithHref[]>([])
   const [offset, setOffset] = useState(initial)
   const [done, setDone] = useState(false)
@@ -38,7 +42,7 @@ export function LoadMore({ label, offset: initial, pageSize, categoryId, query }
   return (
     <>
       {items.map((p) => (
-        <NewsItem key={p.id} post={p} />
+        <Item key={p.id} post={p} />
       ))}
       {!done && (
         <div className="bottom-nav ignore-select">

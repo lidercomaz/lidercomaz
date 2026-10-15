@@ -1,13 +1,11 @@
 import type { Metadata } from 'next'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { cache } from 'react'
 import { ContentPage } from '@/components/ContentPage'
 import { PostTitle } from '@/components/PostTitle'
 import { ViewCounter } from '@/components/ViewCounter'
-import { data } from '@/lib/data'
-import { categoryMap, formatDayMonth, formatTime, formatYear, postPath } from '@/lib/format'
+import { formatDayMonth, formatTime, formatYear } from '@/lib/format'
+import { isCanonical, loadPost, postMetadata } from '@/lib/post'
 import { SITE_URL, isLang } from '@/lib/site'
-import type { Lang } from '@/lib/types'
 
 export const revalidate = 300
 
@@ -16,43 +14,19 @@ export function generateStaticParams() {
   return []
 }
 
-const load = cache(async (lang: Lang, segment: string) => {
-  const m = /^(\d+)(?:-.*)?\.html$/.exec(decodeURIComponent(segment))
-  if (!m) return null
-  const [post, cats] = await Promise.all([data.post(lang, Number(m[1])), data.categories(lang)])
-  return post ? { post, path: postPath(post, categoryMap(cats)) } : null
-})
-
 export async function generateMetadata({ params }: PageProps<'/[lang]/[category]/[post]'>): Promise<Metadata> {
-  const { lang, post: segment } = await params
-  if (!isLang(lang)) return {}
-  const r = await load(lang, segment)
-  if (!r) return {}
-  const { post, path } = r
-  return {
-    title: post.title,
-    description: post.excerpt ?? undefined,
-    keywords: post.keywords ?? undefined,
-    alternates: { canonical: path },
-    openGraph: {
-      type: 'article',
-      title: post.title,
-      description: post.excerpt ?? undefined,
-      url: path,
-      images: post.image ? [post.image] : undefined,
-      publishedTime: post.published_at,
-    },
-  }
+  const { lang, post } = await params
+  return isLang(lang) ? postMetadata(lang, post) : {}
 }
 
 export default async function PostPage({ params }: PageProps<'/[lang]/[category]/[post]'>) {
   const { lang, category, post: segment } = await params
   if (!isLang(lang)) notFound()
-  const r = await load(lang, segment)
+  const r = await loadPost(lang, segment)
   if (!r) notFound()
   const { post, path } = r
   // Old links with a wrong/changed category or slug go to the canonical url.
-  if (path !== `/${decodeURIComponent(category)}/${decodeURIComponent(segment)}`) permanentRedirect(path)
+  if (!isCanonical(path, category, segment)) permanentRedirect(path)
 
   const url = encodeURIComponent(`${SITE_URL[lang]}${path}`)
 

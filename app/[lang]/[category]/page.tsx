@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { renderCategory, resolve } from '@/components/CategoryView'
-import { isLang } from '@/lib/site'
+import { categoryMetadata, renderCategory } from '@/components/CategoryView'
 
 export const revalidate = 60
 
@@ -11,12 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<'/[lang]/[category]'>): Promise<Metadata> {
   const { lang, category } = await params
-  if (!isLang(lang)) return {}
-  const r = await resolve(lang, category)
-  if (!r) return {}
-  return r.kind === 'page'
-    ? { title: r.page.title }
-    : { title: r.category.name, description: r.category.description ?? undefined }
+  return categoryMetadata(lang, category)
 }
 
 export default async function CategoryPage({ params }: PageProps<'/[lang]/[category]'>) {

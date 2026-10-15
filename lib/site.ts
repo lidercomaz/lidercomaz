@@ -38,6 +38,16 @@ interface SiteText {
   searchEmpty: string
   notFound: string
   adPlaceholder: string | null
+  /** smartphone template */
+  m: {
+    menuCols: [MenuItem[], MenuItem[]]
+    footerMenu: MenuItem[]
+    latestTitle: string
+    relatedTitle: string
+    searchPlaceholder: string
+    adPlaceholder: string | null
+    sliderCategoryId?: number
+  }
 }
 
 export const SITE: Record<Lang, SiteText> = {
@@ -92,6 +102,38 @@ export const SITE: Record<Lang, SiteText> = {
     searchEmpty: 'Heç nə tapılmadı.',
     notFound: 'Səhifə tapılmadı',
     adPlaceholder: 'Sizin Reklam Burada',
+    m: {
+      menuCols: [
+        [
+          { href: '/gundem/', label: 'Gündəm' },
+          { href: '/siyaset/', label: 'Siyasət' },
+          { href: '/iqtisadiyyat/', label: 'İqtisadiyyat' },
+          { href: '/medeniyyet/', label: 'Mədəniyyət' },
+          { href: '/hadise/', label: 'Hadisə' },
+          { href: '/sosial/', label: 'Sosial' },
+          { href: '/aktual/', label: 'Aktual' },
+        ],
+        [
+          { href: '/region/', label: 'Region' },
+          { href: '/musahibe/', label: 'Müsahibə' },
+          { href: '/idman/', label: 'İdman' },
+          { href: '/dunya/', label: 'Dünya' },
+          { href: '/arasdirma/', label: 'Araşdırma' },
+          { href: '/maraqli/', label: 'Maraqlı' },
+          { href: '/video/', label: 'Video' },
+        ],
+      ],
+      footerMenu: [
+        { href: '/', label: 'Ana səhifə' },
+        { href: '/about.html', label: 'Haqqımızda' },
+        { href: '/contact.html', label: 'Əlaqə' },
+      ],
+      latestTitle: 'SON XƏBƏRLƏR',
+      relatedTitle: 'Oxşar xəbərlər',
+      searchPlaceholder: 'Axtar',
+      adPlaceholder: 'Sizin reklam burada',
+      sliderCategoryId: 1,
+    },
   },
   ru: {
     htmlLang: 'ru',
@@ -143,10 +185,43 @@ export const SITE: Record<Lang, SiteText> = {
     searchEmpty: 'Ничего не найдено.',
     notFound: 'Страница не найдена',
     adPlaceholder: null,
+    m: {
+      menuCols: [
+        [
+          { href: '/', label: 'Главная страница' },
+          { href: '/gundem/', label: 'Повестка дня' },
+          { href: '/siyaset/', label: 'Политика' },
+          { href: '/iqtisadiyyat/', label: 'Эконом' },
+          { href: '/medeniyyet/', label: 'Культура' },
+          { href: '/sosial/', label: 'Социальное' },
+          { href: '/hadise/', label: 'Событие' },
+        ],
+        [
+          { href: '/musahibe/', label: 'Интервью' },
+          { href: '/dunya/', label: 'Мир' },
+          { href: '/idman/', label: 'Спорт' },
+          { href: '/aktual/', label: 'Текущий' },
+          { href: '/arasdirma/', label: 'Исследовать' },
+          { href: '/maraqli/', label: 'Интересный' },
+          { href: '/video/', label: 'Видео' },
+        ],
+      ],
+      footerMenu: [
+        { href: '/about.html', label: 'О нас' },
+        { href: '/reklam.html', label: 'Реклама' },
+        { href: '/contact.html', label: 'Контакт' },
+      ],
+      latestTitle: 'ПОСЛЕДНИЕ НОВОСТИ',
+      relatedTitle: 'Похожие новости',
+      searchPlaceholder: 'Поиск',
+      adPlaceholder: null,
+    },
   },
 }
 
 export const SOCIAL = {
   facebook: 'https://www.facebook.com/',
   instagram: 'https://www.instagram.com/',
+  twitter: 'https://twitter.com',
+  youtube: 'https://youtube.com',
 }
