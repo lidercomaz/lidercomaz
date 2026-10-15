@@ -4,7 +4,7 @@ Next.js 16 rebuild of lider.com.az (AZ) and ru.lider.com.az (RU), migrated from 
 
 - `proxy.ts` picks the language from the host (`ru.` → RU) and rewrites to `app/[lang]/...`.
 - Old DLE URLs keep working: `/{category}/{id}-{slug}.html`, `/{category}/page/{n}/`, `/index.php?do=search&story=`.
-- Design: original theme CSS in `public/theme/` (desktop template `theme`).
+- Design: original DLE templates — desktop `theme` in `public/theme/`, phones get the `smartphone` template (`app/m/...`, `public/theme-m/`) on the same URLs (proxy.ts checks the User-Agent).
 - Data: Supabase (`supabase/schema.sql`). Without Supabase env vars, dev reads `.data/{az,ru}/*.json`.
 
 ## Local

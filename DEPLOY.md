@@ -61,6 +61,13 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 2. Vercel hansı DNS qeydlərinin lazım olduğunu göstərəcək (A `76.76.21.21`, CNAME `cname.vercel-dns.com`). Onları DNS panelində yaz.
 3. ⚠️ `@lider.com.az` e-poçtları cPanel-dədir. MX qeydlərinə toxunma və poçtu köçürmədən hostinqi bağlama.
 
+## Hazırkı vəziyyət
+
+- AZ: https://lidercomaz.vercel.app · RU: https://ru-lidercomaz.vercel.app
+- Vercel funksiyaları London regionunda işləyir (`vercel.json` → `lhr1`), Supabase də oradadır.
+- `NEXT_PUBLIC_SITE_URL_AZ` / `NEXT_PUBLIC_SITE_URL_RU` hazırda `.vercel.app` ünvanlarına baxır. Domen köçürüləndə onları `https://lider.com.az` və `https://ru.lider.com.az` ilə əvəz edib redeploy et.
+- imgbb pulsuz API təxminən 1000 yükləmədən sonra limit qoyur. `migrate-images.mjs` limitə düşəndə gözləyir və özü davam edir.
+
 ## Təhlükəsizlik
 
 - `.env.local` və `.data/` git-ə düşmür (`.gitignore`).
