@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
+import { preload } from 'react-dom'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { siteMetadata } from '@/lib/meta'
@@ -19,11 +20,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-const CSS = ['engine', 'fonts', 'responsive', 'styles', 'custom']
+const FONTS = ['/theme/fonts/subset-SFProDisplay-Regular.woff2', '/theme/fonts/subset-AlumniSans-SemiBold.woff2']
+
+const CSS = ['engine', 'fonts', 'responsive', 'styles', 'custom', 'enhance', 'footer']
 
 export default async function RootLayout({ children, params }: LayoutProps<'/[lang]'>) {
   const { lang } = await params
   if (!isLang(lang)) notFound()
+  for (const href of FONTS) preload(href, { as: 'font', type: 'font/woff2', crossOrigin: '' })
 
   return (
     <html lang={SITE[lang].htmlLang}>
@@ -34,7 +38,6 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
       </head>
       <body>
         <div className="xsayt">
-          {SITE[lang].adPlaceholder && <div className="ad-placeholder">{SITE[lang].adPlaceholder}</div>}
           <Header lang={lang} />
           <div className="container">
             <div className="centered">

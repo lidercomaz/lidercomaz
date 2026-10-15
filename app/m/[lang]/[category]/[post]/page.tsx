@@ -6,7 +6,7 @@ import { PostTitle } from '@/components/PostTitle'
 import { ViewCounter } from '@/components/ViewCounter'
 import { data } from '@/lib/data'
 import { formatTime, postPath } from '@/lib/format'
-import { isCanonical, loadPost, postMetadata } from '@/lib/post'
+import { articleHtml, isCanonical, loadPost, postMetadata } from '@/lib/post'
 import { SITE, isLang } from '@/lib/site'
 
 export const revalidate = 300
@@ -50,7 +50,7 @@ export default async function MobilePostPage({ params }: PageProps<'/m/[lang]/[c
           </div>
           <div className="full-post-content">
             <h1 className="full-post-title"><PostTitle post={post} /></h1>
-            <div className="full-post-article" id="full-post-article" dangerouslySetInnerHTML={{ __html: post.body }} />
+            <div className="full-post-article" id="full-post-article" dangerouslySetInnerHTML={{ __html: articleHtml(post.body) }} />
             <div className="full-post-extra">
               <div className="fl f-date">{formatTime(post.published_at)} | {day}</div>
             </div>

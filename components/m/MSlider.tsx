@@ -37,12 +37,12 @@ export function MSlider({ posts }: { posts: Slide[] }) {
             className="owl-stage"
             style={{ width: `${n * 100}%`, transform: `translateX(-${(active * 100) / n}%)`, transition: 'transform .4s ease' }}
           >
-            {posts.map((p) => (
+            {posts.map((p, i) => (
               <div key={p.id} className="owl-item" style={{ width: `${100 / n}%` }}>
                 <div className="main-slider-item">
                   <a href={p.href}>
                     <div className="main-slider-image">
-                      <img src={p.image ?? NO_IMAGE} height={220} alt="" />
+                      <img src={p.image ?? NO_IMAGE} height={220} alt="" loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'auto'} />
                       <div className="main-slider-extra">
                         <div className="main-slider-category">{p.categoryName}</div>
                         <div className="main-slider-date">{p.date}</div>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
-import { MFooter } from '@/components/m/MFooter'
+import { preload } from 'react-dom'
+import { Footer } from '@/components/Footer'
 import { MHeader } from '@/components/m/MHeader'
 import { siteMetadata } from '@/lib/meta'
 import { LANGS, SITE, isLang } from '@/lib/site'
@@ -22,17 +23,20 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-const CSS = ['style', 'responsive', 'custom']
+const FONTS = ['/theme-m/fonts/subset-Montserrat-Regular.woff2', '/theme-m/fonts/subset-Montserrat-Medium.woff2']
+
+const CSS = ['/theme-m/css/style.css', '/theme-m/css/responsive.css', '/theme-m/css/custom.css', '/theme/css/footer.css']
 
 export default async function MobileLayout({ children, params }: LayoutProps<'/m/[lang]'>) {
   const { lang } = await params
   if (!isLang(lang)) notFound()
+  for (const href of FONTS) preload(href, { as: 'font', type: 'font/woff2', crossOrigin: '' })
 
   return (
     <html lang={SITE[lang].htmlLang}>
       <head>
         {CSS.map((f) => (
-          <link key={f} rel="stylesheet" href={`/theme-m/css/${f}.css`} precedence="default" />
+          <link key={f} rel="stylesheet" href={f} precedence="default" />
         ))}
       </head>
       <body>
@@ -41,7 +45,7 @@ export default async function MobileLayout({ children, params }: LayoutProps<'/m
           <div id="site_content">
             <div className="homepage">{children}</div>
           </div>
-          <MFooter lang={lang} />
+          <Footer lang={lang} />
         </div>
       </body>
     </html>

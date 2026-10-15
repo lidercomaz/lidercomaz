@@ -67,7 +67,6 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 - AZ: https://lidercomaz.vercel.app · RU: https://ru-lidercomaz.vercel.app
 - Vercel funksiyaları London regionunda işləyir (`vercel.json` → `lhr1`), Supabase də oradadır.
 - `NEXT_PUBLIC_SITE_URL_AZ` / `NEXT_PUBLIC_SITE_URL_RU` hazırda `.vercel.app` ünvanlarına baxır. Domen köçürüləndə onları `https://lider.com.az` və `https://ru.lider.com.az` ilə əvəz edib redeploy et.
-- imgbb istifadə olunmur: ~1000 yükləmədən sonra limit qoyur, istifadə şərtləri də skriptlə və kommersiya məqsədli istifadəni qadağan edir.
 
 ## Təhlükəsizlik
 

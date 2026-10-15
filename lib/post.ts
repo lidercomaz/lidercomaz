@@ -37,3 +37,8 @@ export async function postMetadata(lang: Lang, segment: string): Promise<Metadat
     },
   }
 }
+
+/** The lead image is above the fold: load it immediately, keep the rest lazy. */
+export function articleHtml(body: string) {
+  return body.replace('loading="lazy"', 'loading="eager" fetchpriority="high"')
+}

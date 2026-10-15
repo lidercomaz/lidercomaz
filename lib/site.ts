@@ -38,6 +38,16 @@ interface SiteText {
   searchEmpty: string
   notFound: string
   adPlaceholder: string | null
+  footer: {
+    about: string
+    sectionsTitle: string
+    siteTitle: string
+    siteLinks: MenuItem[]
+    contactTitle: string
+    copyright: string
+    citation: string
+    legal: MenuItem[]
+  }
   /** smartphone template */
   m: {
     menuCols: [MenuItem[], MenuItem[]]
@@ -101,7 +111,26 @@ export const SITE: Record<Lang, SiteText> = {
     searchTitle: 'Axtarış nəticələri',
     searchEmpty: 'Heç nə tapılmadı.',
     notFound: 'Səhifə tapılmadı',
-    adPlaceholder: 'Sizin Reklam Burada',
+    adPlaceholder: null,
+    footer: {
+      about: 'Lider.com.az – müstəqil xəbər portalı. Azərbaycan və dünyada baş verən siyasi, iqtisadi, sosial, mədəni və idman hadisələrini operativ və qərəzsiz şəkildə oxuculara çatdırır.',
+      sectionsTitle: 'Bölmələr',
+      siteTitle: 'Lider.com.az',
+      siteLinks: [
+        { href: '/about.html', label: 'Haqqımızda' },
+        { href: '/redaksiya.html', label: 'Redaksiya' },
+        { href: '/reklam.html', label: 'Reklam' },
+        { href: '/contact.html', label: 'Əlaqə' },
+        { href: '/rss.xml', label: 'RSS' },
+      ],
+      contactTitle: 'Əlaqə',
+      copyright: 'Bütün hüquqlar qorunur.',
+      citation: 'Saytdakı materiallardan istifadə zamanı istinad mütləqdir. İnternet səhifələrində istifadə edildikdə hiperlink vasitəsilə istinad olunmalıdır.',
+      legal: [
+        { href: '/istifade-qaydalari.html', label: 'İstifadə qaydaları' },
+        { href: '/mexfilik-siyaseti.html', label: 'Məxfilik siyasəti' },
+      ],
+    },
     m: {
       menuCols: [
         [
@@ -131,7 +160,7 @@ export const SITE: Record<Lang, SiteText> = {
       latestTitle: 'SON XƏBƏRLƏR',
       relatedTitle: 'Oxşar xəbərlər',
       searchPlaceholder: 'Axtar',
-      adPlaceholder: 'Sizin reklam burada',
+      adPlaceholder: null,
       sliderCategoryId: 1,
     },
   },
@@ -185,6 +214,25 @@ export const SITE: Record<Lang, SiteText> = {
     searchEmpty: 'Ничего не найдено.',
     notFound: 'Страница не найдена',
     adPlaceholder: null,
+    footer: {
+      about: 'Lider.com.az – независимый новостной портал. Оперативно и беспристрастно освещает политические, экономические, социальные, культурные и спортивные события в Азербайджане и мире.',
+      sectionsTitle: 'Разделы',
+      siteTitle: 'Lider.com.az',
+      siteLinks: [
+        { href: '/about.html', label: 'О нас' },
+        { href: '/redaksiya.html', label: 'Редакция' },
+        { href: '/reklam.html', label: 'Реклама' },
+        { href: '/contact.html', label: 'Контакты' },
+        { href: '/rss.xml', label: 'RSS' },
+      ],
+      contactTitle: 'Контакты',
+      copyright: 'Все права защищены.',
+      citation: 'При использовании материалов сайта ссылка обязательна. При публикации в интернете обязательна гиперссылка на источник.',
+      legal: [
+        { href: '/istifade-qaydalari.html', label: 'Правила пользования' },
+        { href: '/mexfilik-siyaseti.html', label: 'Политика конфиденциальности' },
+      ],
+    },
     m: {
       menuCols: [
         [

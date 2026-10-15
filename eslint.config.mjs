@@ -5,7 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Plain <img>: images are served from external hosts (imgbb), no Next image optimization.
+  // Plain <img>: images come pre-sized as WebP from /img (Supabase Storage + CDN), no Next image optimization.
   { rules: { "@next/next/no-img-element": "off" } },
   // Override default ignores of eslint-config-next.
   globalIgnores([

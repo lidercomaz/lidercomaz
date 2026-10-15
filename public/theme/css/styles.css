@@ -11,7 +11,7 @@ blockquote,q{quotes:none}
 blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}
 table{border-collapse:collapse;border-spacing:0}
 html{height:100%;min-height:100%;}
-body{min-height:100%; min-width:320px; background-image: url(../images/bg-page.jpg);}
+body{min-height:100%; min-width:320px; background-color:#fff;}
 html,html a{-webkit-font-smoothing:antialiased}
 body,select,input,textarea,button{font:normal 14px/1.5  'sfprodisplay', Arial, Helvetica, sans-serif; color:#000;outline:none}
 a{outline:none;color:#000;text-decoration:none}

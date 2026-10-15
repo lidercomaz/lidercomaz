@@ -4,7 +4,7 @@ import { ContentPage } from '@/components/ContentPage'
 import { PostTitle } from '@/components/PostTitle'
 import { ViewCounter } from '@/components/ViewCounter'
 import { formatDayMonth, formatTime, formatYear } from '@/lib/format'
-import { isCanonical, loadPost, postMetadata } from '@/lib/post'
+import { articleHtml, isCanonical, loadPost, postMetadata } from '@/lib/post'
 import { SITE_URL, isLang } from '@/lib/site'
 
 export const revalidate = 300
@@ -61,7 +61,7 @@ export default async function PostPage({ params }: PageProps<'/[lang]/[category]
 
           <div className="full-post-article">
             <article className="article-full-story">
-              <div dangerouslySetInnerHTML={{ __html: post.body }} />
+              <div dangerouslySetInnerHTML={{ __html: articleHtml(post.body) }} />
             </article>
           </div>
         </div>

@@ -32,7 +32,6 @@ export default async function MobileHome({ params }: PageProps<'/m/[lang]'>) {
           categoryName: map.get(p.category_ids[0])?.name ?? '',
         }))}
       />
-      {t.m.adPlaceholder && <div className="m-ad-placeholder">{t.m.adPlaceholder}</div>}
       <div className="posts last">
         <div className="p-title"><h2>{t.m.latestTitle}</h2></div>
         <div className="posts-wrap infinity">

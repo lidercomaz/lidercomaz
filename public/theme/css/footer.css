@@ -1,0 +1,24 @@
+/* Shared footer (desktop and mobile layouts). */
+.site-footer {background: #1d2127; color: #b9bec6; margin-top: 30px; font-family: sfprodisplay, Montserrat, Arial, sans-serif;}
+.site-footer .centered {max-width: 1280px; margin: 0 auto; padding: 0 15px;}
+.site-footer a {color: #dfe3e8; transition: color .2s;}
+.site-footer a:hover {color: #fff;}
+.site-footer .f-top {display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 30px; padding: 40px 0 30px;}
+.site-footer .f-logo img {height: 46px; width: auto; background: #fff; padding: 6px 10px; border-radius: 6px;}
+.site-footer .f-about {margin-top: 14px; font-size: 14px; line-height: 1.6;}
+.site-footer h4 {color: #fff; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 14px;}
+.site-footer ul li {margin-bottom: 8px; font-size: 14px;}
+.site-footer .f-contact li {line-height: 1.5;}
+.site-footer .f-social {display: flex; gap: 10px; margin-top: 16px;}
+.site-footer .f-social a {width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .08); display: grid; place-items: center; color: #fff;}
+.site-footer .f-social a:hover {background: var(--accent);}
+.site-footer .f-bottom {border-top: 1px solid rgba(255, 255, 255, .08); padding: 18px 0 22px; font-size: 13px; line-height: 1.6; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;}
+.site-footer .f-legal a {margin-left: 16px;}
+
+.site-footer .f-cols {columns: 2; column-gap: 16px;}
+@media only screen and (max-width: 1000px) {.site-footer .f-top {grid-template-columns: 1fr 1fr;}}
+@media only screen and (max-width: 700px) {
+  .site-footer .f-top {grid-template-columns: 1fr; gap: 24px; padding: 30px 0 20px;}
+  .site-footer .f-legal a {margin: 0 16px 0 0;}
+  .site-footer .f-bottom {flex-direction: column;}
+}

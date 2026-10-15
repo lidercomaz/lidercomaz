@@ -28,7 +28,7 @@ export function MainSlider({ posts, readMore }: Props) {
           <div key={p.id} className={`m-slider-item${i === active ? ' active' : ''}`}>
             <a href={p.href}>
               <div className="m-slider-image">
-                <img src={p.image ?? NO_IMAGE} alt="" style={{ height: 410 }} />
+                <img src={p.image ?? NO_IMAGE} alt="" style={{ height: 410 }} loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'auto'} />
               </div>
               <div className="m-slider-info">
                 <h2 className="m-slider-title">

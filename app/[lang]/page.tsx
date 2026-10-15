@@ -69,8 +69,6 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
         </div>
       </div>
 
-      {t.adPlaceholder && <div className="ad-placeholder" style={{ marginBottom: 10 }}>{t.adPlaceholder}</div>}
-
       <section className="news-block fxd">
         <div className="news-block-wrap infinite">
           {feed.map((p) => (
