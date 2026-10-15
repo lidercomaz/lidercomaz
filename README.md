@@ -18,11 +18,11 @@ AZ: http://localhost:3000 · RU: http://ru.localhost:3000
 
 ## Migration
 
-The original DLE backup lives next to this repo in `../arxiv/` (cPanel home backup `.tar.gz` and both SQL dumps).
-To re-run the image step, extract `public_html` from the archive into `../arxiv/site/` first.
+The original DLE backup lives in `arxiv/` (git-ignored): the cPanel home backup `.tar.gz` and both SQL dumps.
+To re-run the image step, extract `public_html` from the archive into `arxiv/site/` first.
 
-1. `python3 -I scripts/migrate/dump_to_json.py ../arxiv/lidercom_<lang>.sql.gz ../data/<lang> dle_post,dle_post_extras,dle_category,dle_static,dle_tags,dle_images`
-2. `python3 -I scripts/migrate/clean_posts.py ../data <lang> .data`
+1. `python3 -I scripts/migrate/dump_to_json.py arxiv/lidercom_<lang>.sql.gz arxiv/json/<lang> dle_post,dle_post_extras,dle_category,dle_static,dle_tags,dle_images`
+2. `python3 -I scripts/migrate/clean_posts.py arxiv/json <lang> .data`
 3. Run `supabase/schema.sql` in the Supabase SQL editor.
 4. `cp .env.example .env.local`, fill in the keys, then `node --env-file=.env.local scripts/import-supabase.mjs`
 

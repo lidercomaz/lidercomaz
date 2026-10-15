@@ -43,3 +43,6 @@ next-env.d.ts
 # migrated content (local dev only)
 /.data
 !.env.example
+
+# original DLE backup (cPanel archive + SQL dumps), kept locally only
+/arxiv
