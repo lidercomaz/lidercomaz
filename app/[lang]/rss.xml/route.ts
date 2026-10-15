@@ -2,7 +2,7 @@ import { data } from '@/lib/data'
 import { categoryMap, postPath } from '@/lib/format'
 import { SITE, SITE_URL, isLang } from '@/lib/site'
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 const esc = (s: string) => s.replace(/[<>&'"]/g, (c) => `&#${c.charCodeAt(0)};`)
 
@@ -19,5 +19,10 @@ export async function GET(_: Request, { params }: RouteContext<'/[lang]/rss.xml'
     })
     .join('')
   const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${esc(SITE[lang].title)}</title><link>${base}/</link><description>${esc(SITE[lang].description)}</description><language>${lang}</language>${items}</channel></rss>`
-  return new Response(xml, { headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' } })
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/rss+xml; charset=utf-8',
+      'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+    },
+  })
 }

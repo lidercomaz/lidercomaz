@@ -2,9 +2,10 @@ import { data } from '@/lib/data'
 import { categoryMap, postPath } from '@/lib/format'
 import { SITE_URL, isLang } from '@/lib/site'
 
-export const revalidate = 3600
+// Dynamic route + CDN cache: a prerendered [lang] route handler is not served on Vercel.
+export const dynamic = 'force-dynamic'
 
-export async function GET(_: Request, { params }: RouteContext<'/[lang]/sitemap.xml'>) {
+export async function GET(_: Request, { params }: RouteContext<'/[lang]/sitemap-xml'>) {
   const { lang } = await params
   if (!isLang(lang)) return new Response(null, { status: 404 })
   const base = SITE_URL[lang]
@@ -16,5 +17,10 @@ export async function GET(_: Request, { params }: RouteContext<'/[lang]/sitemap.
     ...posts.map((p) => `<url><loc>${base}${postPath(p, map)}</loc><lastmod>${p.published_at}</lastmod></url>`),
   ]
   const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`
-  return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } })
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  })
 }

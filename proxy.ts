@@ -11,7 +11,9 @@ export function proxy(req: NextRequest) {
   }
 
   const lang = langFromHost(req.headers.get('host'))
-  url.pathname = `/${lang}${url.pathname === '/' ? '' : url.pathname}`
+  // "sitemap.xml" is a reserved Next.js file name, so the route lives at /[lang]/sitemap-xml.
+  const path = url.pathname === '/sitemap.xml' ? '/sitemap-xml' : url.pathname
+  url.pathname = `/${lang}${path === '/' ? '' : path}`
   return NextResponse.rewrite(url)
 }
 
