@@ -64,9 +64,11 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 
 ## Hazırkı vəziyyət
 
-- AZ: https://lidercomaz.vercel.app · RU: https://ru-lidercomaz.vercel.app
+- AZ: https://lider.com.az · RU: https://ru.lider.com.az (test: lidercomaz.vercel.app, ru-lidercomaz.vercel.app)
+- DNS: Cloudflare (nameserver-lər online.az-da), qeydlər Vercel-ə yönəlir, proxy sönülüdür (DNS only).
 - Vercel funksiyaları London regionunda işləyir (`vercel.json` → `lhr1`), Supabase də oradadır.
-- `NEXT_PUBLIC_SITE_URL_AZ` / `NEXT_PUBLIC_SITE_URL_RU` hazırda `.vercel.app` ünvanlarına baxır. Domen köçürüləndə onları `https://lider.com.az` və `https://ru.lider.com.az` ilə əvəz edib redeploy et.
+- `NEXT_PUBLIC_SITE_URL_AZ` = `https://lider.com.az`, `NEXT_PUBLIC_SITE_URL_RU` = `https://ru.lider.com.az`.
+- Poçt: köhnə cPanel poçtu istifadə olunmur; yeni poçt Zoho Mail ilə qurulacaq (MX/SPF/DKIM qeydləri Cloudflare-ə yazılacaq).
 
 ## Təhlükəsizlik
 
