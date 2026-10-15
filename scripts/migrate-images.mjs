@@ -207,10 +207,15 @@ async function runApply() {
     if (!(await exists(orig))) await copyFile(file, orig)
     const posts = await loadPosts(lang, 'posts.orig.json')
     let changed = 0
+    // Images whose source no longer exists (404 on the original host) are dropped:
+    // cards fall back to no_image.jpg and the broken <img> is removed from the text.
+    const gone = (u) => /^download 404/.test(map[u]?.error ?? '')
     for (const p of posts) {
       const before = p.body + p.image
-      if (p.image) p.image = map[p.image]?.small ?? p.image
-      p.body = p.body.replace(IMG_SRC, (tag, src) => tag.replace(src, full(decode(src)).replace(/&/g, '&amp;')))
+      if (p.image) p.image = gone(p.image) ? null : (map[p.image]?.small ?? p.image)
+      p.body = p.body.replace(/<img[^>]+src="([^"]+)"[^>]*>/g, (tag, src) =>
+        gone(decode(src)) ? '' : tag.replace(src, full(decode(src)).replace(/&/g, '&amp;')),
+      )
       if (p.body + p.image !== before) changed++
     }
     await writeFile(file, JSON.stringify(posts))
