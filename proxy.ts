@@ -12,19 +12,37 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // Legacy DLE links: /index.php?newsid=123 and /index.php?do=search&story=...
+  const lang = langFromHost(host)
+
+  // Legacy DLE urls (old .htaccess) → new pages
   if (url.pathname === '/index.php') {
     const story = url.searchParams.get('story')
     if (story) return NextResponse.redirect(new URL(`/search?q=${encodeURIComponent(story)}`, url), 301)
+    const newsid = url.searchParams.get('newsid')
+    if (newsid && /^\d+$/.test(newsid)) return rewriteTo(url, `/${lang}/go/${newsid}`)
+    return NextResponse.redirect(new URL('/', url), 301)
+  }
+  // /123-slug.html, /cat/page,2,123-slug.html, /page,1,2,123-slug.html, print:page,...
+  const legacy = /^\/(?:[^/]+\/)?(?:print:)?(?:page,\d+,(?:\d+,)?)?(\d+)-[^/]*\.html$/.exec(url.pathname)
+  if (legacy && !/^\/[^/]+\/\d+-[^/]*\.html$/.test(url.pathname)) return rewriteTo(url, `/${lang}/go/${legacy[1]}`)
+  // /page/2/, /lastnews/, /2026/10/15/ archives → home
+  if (/^\/(page\/\d+|lastnews|newposts|\d{4}(\/\d{2}){0,2}(\/page\/\d+)?)\/?$/.test(url.pathname)) {
+    return NextResponse.redirect(new URL('/', url), 301)
   }
 
-  const lang = langFromHost(host)
   // "sitemap.xml" is a reserved Next.js file name, so the route lives at /[lang]/sitemap-xml.
   const path = url.pathname === '/sitemap.xml' ? '/sitemap-xml' : url.pathname
   // Phones get the smartphone template (app/m/...) on the same public url.
   const mobile = isMobileUA(req.headers.get('user-agent')) && !path.startsWith('/sitemap-xml') && !/^\/(rss\.xml|robots\.txt)$/.test(path)
   url.pathname = `${mobile ? '/m' : ''}/${lang}${path === '/' ? '' : path}`
   return NextResponse.rewrite(url)
+}
+
+function rewriteTo(url: URL, pathname: string) {
+  const target = new URL(url)
+  target.pathname = pathname
+  target.search = ''
+  return NextResponse.rewrite(target)
 }
 
 export const config = {

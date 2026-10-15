@@ -32,7 +32,7 @@ export async function postMetadata(lang: Lang, segment: string): Promise<Metadat
       title: post.title,
       description: post.excerpt ?? undefined,
       url: path,
-      images: post.image ? [post.image] : undefined,
+      images: [post.image ? post.image.replace(/-s\.webp$/, '.webp') : '/theme/images/logo.png'],
       publishedTime: post.published_at,
     },
   }

@@ -11,5 +11,8 @@ export function siteMetadata(lang: Lang): Metadata {
     icons: { icon: '/favicon.ico', apple: '/theme/images/touch-icon-ipad-retina.png' },
     alternates: { types: { 'application/rss+xml': '/rss.xml' } },
     formatDetection: { telephone: false },
+    // Default preview for pages without their own picture (posts set their own image).
+    openGraph: { siteName: t.title, type: 'website', locale: lang === 'ru' ? 'ru_RU' : 'az_AZ', images: ['/theme/images/logo.png'] },
+    twitter: { card: 'summary_large_image' },
   }
 }
