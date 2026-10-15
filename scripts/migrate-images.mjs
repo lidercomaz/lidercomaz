@@ -19,7 +19,7 @@ const BACKUP = path.resolve(ROOT, process.env.DLE_BACKUP_DIR ?? '../source/site/
 const UPLOADS = { az: path.join(BACKUP, 'uploads'), ru: path.join(BACKUP, 'ru', 'uploads') }
 const HOST_LANG = { 'lider.com.az': 'az', 'www.lider.com.az': 'az', 'ru.lider.com.az': 'ru' }
 const KEY = process.env.IMGBB_API_KEY
-const CONCURRENCY = 4
+const CONCURRENCY = 2
 const MAX_WIDTH = 1200
 
 const [cmd, ...flags] = process.argv.slice(2)
@@ -99,8 +99,16 @@ async function toWebp(buf) {
   return { buf: out.length < buf.length || meta.format !== 'webp' ? out : buf, ext: 'webp' }
 }
 
+// imgbb throttles bursts ("Rate limit reached"); all workers pause together and retry.
+let pausedUntil = 0
+let backoff = 5 * 60_000
+async function waitIfPaused() {
+  while (Date.now() < pausedUntil) await sleep(Math.min(pausedUntil - Date.now(), 30_000))
+}
+
 async function upload(buf, name) {
   for (let attempt = 1; ; attempt++) {
+    await waitIfPaused()
     const body = new FormData()
     body.set('image', buf.toString('base64'))
     body.set('name', name)
@@ -110,13 +118,20 @@ async function upload(buf, name) {
       signal: AbortSignal.timeout(60_000),
     }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }))
     if (res.ok) {
+      backoff = 5 * 60_000
       const { data } = await res.json()
       return { url: data.url, medium: data.medium?.url ?? data.url, thumb: data.thumb?.url ?? data.url }
     }
     const text = (await res.text()).slice(0, 200)
-    if (attempt >= 4 || (res.status >= 400 && res.status < 500 && res.status !== 429)) {
-      throw new Error(`imgbb ${res.status}: ${text}`)
+    if (/rate limit/i.test(text) || res.status === 429) {
+      if (Date.now() >= pausedUntil) {
+        pausedUntil = Date.now() + backoff
+        console.log(`\n${new Date().toLocaleTimeString()} imgbb rate limit, pausing ${backoff / 60_000} min`)
+        backoff = Math.min(backoff * 2, 60 * 60_000)
+      }
+      continue
     }
+    if (attempt >= 4 || (res.status >= 400 && res.status < 500)) throw new Error(`imgbb ${res.status}: ${text}`)
     await sleep(attempt * 5000)
   }
 }
