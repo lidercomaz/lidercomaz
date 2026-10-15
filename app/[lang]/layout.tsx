@@ -4,8 +4,6 @@ import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LANGS, SITE, SITE_URL, isLang } from '@/lib/site'
 
-export const dynamicParams = false
-
 export function generateStaticParams() {
   return LANGS.map((lang) => ({ lang }))
 }
