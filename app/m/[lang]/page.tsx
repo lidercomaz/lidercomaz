@@ -8,7 +8,7 @@ import { SITE, isLang } from '@/lib/site'
 
 export const revalidate = 60
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 12
 
 export default async function MobileHome({ params }: PageProps<'/m/[lang]'>) {
   const { lang } = await params
@@ -38,7 +38,7 @@ export default async function MobileHome({ params }: PageProps<'/m/[lang]'>) {
           {feed.map((p) => (
             <MPostItem key={p.id} post={{ ...p, href: postPath(p, map) }} />
           ))}
-          <LoadMore label={t.loadMore} offset={feed.length} pageSize={20} variant="m" />
+          <LoadMore label={t.loadMore} offset={feed.length} pageSize={10} variant="m" />
         </div>
       </div>
     </>

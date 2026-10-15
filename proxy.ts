@@ -46,5 +46,5 @@ function rewriteTo(url: URL, pathname: string) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/|api/|img/|theme/|theme-m/|favicon.ico).*)'],
+  matcher: ['/((?!_next/|api/|img/|theme/|theme-m/|favicon.ico|icon-192.png|icon-512.png|apple-touch-icon.png).*)'],
 }

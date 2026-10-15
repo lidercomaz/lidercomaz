@@ -8,7 +8,14 @@ export function siteMetadata(lang: Lang): Metadata {
     metadataBase: new URL(SITE_URL[lang]),
     title: { default: t.title, template: `%s » ${t.title}` },
     description: t.description,
-    icons: { icon: '/favicon.ico', apple: '/theme/images/touch-icon-ipad-retina.png' },
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48' },
+        { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+        { url: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+      ],
+      apple: '/apple-touch-icon.png',
+    },
     alternates: { types: { 'application/rss+xml': '/rss.xml' } },
     formatDetection: { telephone: false },
     // Default preview for pages without their own picture (posts set their own image).

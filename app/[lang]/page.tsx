@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { LoadMore } from '@/components/LoadMore'
+import { AdSlot } from '@/components/AdSlot'
 import { MainSlider } from '@/components/MainSlider'
 import { NewsItem } from '@/components/NewsItem'
 import { PostTitle } from '@/components/PostTitle'
@@ -9,7 +10,7 @@ import { SITE, isLang } from '@/lib/site'
 
 export const revalidate = 60
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 24
 
 export default async function Home({ params }: PageProps<'/[lang]'>) {
   const { lang } = await params
@@ -71,14 +72,22 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
         </div>
       </div>
 
-      <section className="news-block fxd">
-        <div className="news-block-wrap infinite">
-          {feed.map((p) => (
-            <NewsItem key={p.id} post={withHref(p)} />
-          ))}
-          <LoadMore label={t.loadMore} offset={feed.length} pageSize={PAGE_SIZE} />
-        </div>
-      </section>
+      <div className={t.sideAdSlot ? 'home-grid' : undefined}>
+        <section className="news-block fxd">
+          <div className="news-block-wrap infinite">
+            {feed.map((p) => (
+              <NewsItem key={p.id} post={withHref(p)} />
+            ))}
+            <LoadMore label={t.loadMore} offset={feed.length} pageSize={PAGE_SIZE} />
+          </div>
+        </section>
+        {t.sideAdSlot && (
+          <aside className="home-ad">
+            <AdSlot slot={t.sideAdSlot} />
+            <AdSlot slot={t.sideAdSlot} />
+          </aside>
+        )}
+      </div>
     </>
   )
 }

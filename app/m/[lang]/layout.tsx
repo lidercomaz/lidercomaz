@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { preload } from 'react-dom'
 import { Footer } from '@/components/Footer'
 import { MHeader } from '@/components/m/MHeader'
-import { SiteAnalytics } from '@/components/SiteAnalytics'
 import { siteMetadata } from '@/lib/meta'
 import { LANGS, SITE, isLang } from '@/lib/site'
 
@@ -48,7 +47,6 @@ export default async function MobileLayout({ children, params }: LayoutProps<'/m
           </div>
           <Footer lang={lang} />
         </div>
-        <SiteAnalytics />
       </body>
     </html>
   )

@@ -2,6 +2,7 @@ import { data } from '@/lib/data'
 import { categoryMap, formatTime, postPath } from '@/lib/format'
 import { SITE } from '@/lib/site'
 import type { Lang, PostCard } from '@/lib/types'
+import { AdSlot } from './AdSlot'
 import { PostTitle } from './PostTitle'
 
 function Lent({ posts, href }: { posts: PostCard[]; href: (p: PostCard) => string }) {
@@ -40,6 +41,11 @@ export async function Sidebar({ lang }: { lang: Lang }) {
 
   return (
     <div className="page-right">
+      {t.sideAdSlot && (
+        <div className="s-widget ad-widget">
+          <AdSlot slot={t.sideAdSlot} />
+        </div>
+      )}
       <div className="s-widget">
         <div className="w-title-wrap"><h2 className="w-title">{t.feedTitle}</h2></div>
         <div className="s-posts"><Lent posts={latest} href={href} /></div>

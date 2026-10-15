@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { SITE, SOCIAL } from '@/lib/site'
+import { useCounterpartPath } from '@/lib/lang-switch'
+import { SITE, SITE_URL, SOCIAL } from '@/lib/site'
 import type { Lang } from '@/lib/types'
 
 /** smartphone/main.tpl header, slide-out menu and search panel */
 export function MHeader({ lang }: { lang: Lang }) {
   const t = SITE[lang]
   const [panel, setPanel] = useState<'menu' | 'search' | null>(null)
+  const path = useCounterpartPath()
 
   useEffect(() => {
     document.body.classList.toggle('mobil-open', panel === 'menu')
@@ -34,6 +36,10 @@ export function MHeader({ lang }: { lang: Lang }) {
       <div className="mobile-fixed" onClick={(e) => e.target === e.currentTarget && close()}>
         <div className="menu-panel">
           <div className="menu-a">
+            <div className="m-lang">
+              <a href={lang === 'az' ? path : `${SITE_URL.az}${path}`} className={lang === 'az' ? 'active' : undefined}>AZ</a>
+              <a href={lang === 'ru' ? path : `${SITE_URL.ru}${path}`} className={lang === 'ru' ? 'active' : undefined}>RU</a>
+            </div>
             <div className="menu-top">
               <div className="m-social">
                 <ul>

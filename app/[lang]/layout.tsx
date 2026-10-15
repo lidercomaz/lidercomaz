@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation'
 import { preload } from 'react-dom'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
-import { SideAds } from '@/components/SideAds'
-import { SiteAnalytics } from '@/components/SiteAnalytics'
 import { siteMetadata } from '@/lib/meta'
 import { LANGS, SITE, isLang } from '@/lib/site'
 
@@ -40,7 +38,6 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
       </head>
       <body>
         <div className="xsayt">
-          {SITE[lang].sideAdSlot && <SideAds slot={SITE[lang].sideAdSlot} />}
           <Header lang={lang} />
           <div className="container">
             <div className="centered">
@@ -51,7 +48,6 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
           </div>
           <Footer lang={lang} />
         </div>
-        <SiteAnalytics />
       </body>
     </html>
   )

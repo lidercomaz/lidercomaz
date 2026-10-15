@@ -9,7 +9,7 @@
 }
 
 /* ---------- Layout: 1040px → up to 1280px, fluid below ---------- */
-.centered {width: auto; max-width: 1280px; padding: 0 15px; margin: 0 auto;}
+.centered {width: auto; max-width: 1360px; padding: 0 15px; margin: 0 auto;}
 .container {padding-top: 20px;}
 .site-a {display: block;}
 
@@ -87,10 +87,7 @@
 
 /* ---------- Motion ---------- */
 @keyframes fadeUp {from {opacity: 0; transform: translateY(12px);} to {opacity: 1; transform: none;}}
-.news-block-item, .top-news-item, #dle-content > .news-block-item, .full-post-wrap, .static-page {animation: fadeUp .45s var(--ease) both;}
-.news-block-wrap .news-block-item:nth-child(4n+2) {animation-delay: .04s;}
-.news-block-wrap .news-block-item:nth-child(4n+3) {animation-delay: .08s;}
-.news-block-wrap .news-block-item:nth-child(4n+4) {animation-delay: .12s;}
+.full-post-wrap, .static-page {animation: fadeUp .3s var(--ease) both;}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {animation: none !important; transition: none !important;}
 }
@@ -107,12 +104,14 @@
   .m-slider-wrap.owl-carousel, .m-slider-wrap .m-slider-item .m-slider-image img {height: 260px;}
 }
 
-
-/* ---------- Side banners (ainsyndication 160x600), only where they fit beside the 1280px layout ---------- */
-.xsayt {position: relative;}
-.reklamsol, .reklamsag {display: none; position: absolute; top: 216px; width: 160px; height: 600px; z-index: 1;}
-.reklamsol {right: 50%; margin-right: 655px;}
-.reklamsag {left: 50%; margin-left: 655px;}
-@media only screen and (min-width: 1660px) {
-  .reklamsol, .reklamsag {display: block;}
+/* ---------- Ads in the right column (ainsyndication 160x600) ---------- */
+.ad-slot {margin: 0 auto;}
+.ad-widget {position: sticky; top: 12px; z-index: 2; display: flex; justify-content: center; padding: 10px 0; background: #f6f7f9; border-radius: 8px;}
+.home-grid {display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 20px; align-items: start;}
+.home-grid .news-block-wrap .news-block-item {width: 33.333%;}
+.home-ad {position: sticky; top: 12px; display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 15px 0; background: #f6f7f9; border-radius: 8px;}
+@media only screen and (max-width: 1000px) {
+  .home-grid {grid-template-columns: 1fr;}
+  .home-ad, .ad-widget {display: none;}
 }
+.language ul li.active a {font-weight: bold; text-decoration: underline; text-underline-offset: 3px;}

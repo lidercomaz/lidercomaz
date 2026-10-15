@@ -21,7 +21,7 @@ html {background:#ebeff2; color-scheme: light;}
 .posts {padding: 22px 14px;}
 .posts-wrap {margin: 0 -7px; display: flex; flex-wrap: wrap;}
 .posts-wrap::after {display: none !important;}
-.posts-wrap .post {width: 100%; float: none; padding: 0 7px; margin-bottom: 16px; animation: mFadeUp .45s var(--m-ease) both;}
+.posts-wrap .post {width: 100%; float: none; padding: 0 7px; margin-bottom: 16px;}
 .posts-wrap > .bottom-nav {flex: 0 0 100%;}
 .posts-wrap .post a {border-radius: 12px; box-shadow: 0 4px 14px rgba(30, 40, 51, .08); transition: transform .2s var(--m-ease), box-shadow .2s;}
 .posts-wrap .post a:active {transform: scale(.985); box-shadow: 0 2px 8px rgba(30, 40, 51, .1);}
@@ -51,3 +51,8 @@ html {background:#ebeff2; color-scheme: light;}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {animation: none !important; transition: none !important;}
 }
+
+/* Language switch in the slide-out menu */
+.m-lang {display: flex; gap: 8px; padding: 14px 20px 0;}
+.m-lang a {padding: 4px 12px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .5); color: #fff; font-weight: 600; font-size: 13px;}
+.m-lang a.active {background: #fff; color: #303f50;}
