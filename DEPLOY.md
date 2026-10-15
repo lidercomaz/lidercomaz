@@ -15,23 +15,25 @@ Bundan sonra xəbərlər lokal kompüterdən idxal olunur:
 node --env-file=.env.local scripts/import-supabase.mjs
 ```
 
-## 2. Şəkillər: imgbb-yə köçürmə
+## 2. Şəkillər: Supabase Storage
+
+Şəkillər Supabase-in public `images` bucket-ində WebP formatında saxlanılır. Hər şəkil iki ölçüdədir: 1200 px məqalə üçün, 480 px kartlar üçün. Sayt onları `/img/...` ünvanı ilə göstərir və Vercel CDN-də keşləyir, buna görə Supabase trafiki hər fayl üçün təxminən bir dəfə istifadə olunur.
 
 ```bash
-# 1) Bütün şəkilləri WebP formatına çevirib imgbb-yə yükləyir (dayansa, yenidən işə salanda qaldığı yerdən davam edir)
+# 1) Şəkilləri bucket-ə yükləyir (dayansa, yenidən işə salanda qaldığı yerdən davam edir)
 node --env-file=.env.local scripts/migrate-images.mjs upload
 
 # 2) Alınmayanları bir daha yoxlayır
 node --env-file=.env.local scripts/migrate-images.mjs upload --retry-errors
 
-# 3) Xəbərlərdəki şəkil linklərini imgbb linkləri ilə əvəz edir
+# 3) Xəbərlərdəki şəkil linklərini /img/... linkləri ilə əvəz edir
 node --env-file=.env.local scripts/migrate-images.mjs apply
 
 # 4) Yenilənmiş xəbərləri Supabase-ə yazır
 node --env-file=.env.local scripts/import-supabase.mjs
 ```
 
-Köhnə şəkil → yeni link uyğunluğu `.data/image-map.json` faylında saxlanılır. Bu faylı ehtiyat üçün saxla.
+Köhnə şəkil → yeni link uyğunluğu `.data/storage-map.json` faylında saxlanılır.
 
 ## 3. Vercel: deploy
 
@@ -45,7 +47,6 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
    |---|---|
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → API → `anon` `public` açarı |
-   | `IMGBB_API_KEY` | imgbb API açarı (**Sensitive** işarələ) |
 
    `SUPABASE_SERVICE_ROLE_KEY` hələlik Vercel-ə **əlavə etmə**. Bu açar yalnız admin panel qurulanda lazım olacaq və hər zaman **Sensitive** olmalıdır.
 4. **Deploy** düyməsinə bas. Bir neçə dəqiqədən sonra sayt `https://<layihə>.vercel.app` ünvanında açılacaq (AZ versiya).
@@ -66,7 +67,7 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 - AZ: https://lidercomaz.vercel.app · RU: https://ru-lidercomaz.vercel.app
 - Vercel funksiyaları London regionunda işləyir (`vercel.json` → `lhr1`), Supabase də oradadır.
 - `NEXT_PUBLIC_SITE_URL_AZ` / `NEXT_PUBLIC_SITE_URL_RU` hazırda `.vercel.app` ünvanlarına baxır. Domen köçürüləndə onları `https://lider.com.az` və `https://ru.lider.com.az` ilə əvəz edib redeploy et.
-- imgbb pulsuz API təxminən 1000 yükləmədən sonra limit qoyur. `migrate-images.mjs` limitə düşəndə gözləyir və özü davam edir.
+- imgbb istifadə olunmur: ~1000 yükləmədən sonra limit qoyur, istifadə şərtləri də skriptlə və kommersiya məqsədli istifadəni qadağan edir.
 
 ## Təhlükəsizlik
 

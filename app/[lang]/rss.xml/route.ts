@@ -15,7 +15,7 @@ export async function GET(_: Request, { params }: RouteContext<'/[lang]/rss.xml'
   const items = posts
     .map((p) => {
       const link = `${base}${postPath(p, map)}`
-      return `<item><title>${esc(p.title)}</title><link>${link}</link><guid>${link}</guid><pubDate>${new Date(p.published_at).toUTCString()}</pubDate>${p.image ? `<enclosure url="${esc(p.image)}" type="image/jpeg" length="0"/>` : ''}</item>`
+      return `<item><title>${esc(p.title)}</title><link>${link}</link><guid>${link}</guid><pubDate>${new Date(p.published_at).toUTCString()}</pubDate>${p.image ? `<enclosure url="${esc(new URL(p.image, base).href)}" type="${p.image.endsWith('.webp') ? 'image/webp' : 'image/jpeg'}" length="0"/>` : ''}</item>`
     })
     .join('')
   const xml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${esc(SITE[lang].title)}</title><link>${base}/</link><description>${esc(SITE[lang].description)}</description><language>${lang}</language>${items}</channel></rss>`
