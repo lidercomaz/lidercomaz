@@ -17,7 +17,7 @@ export default async function MobileHome({ params }: PageProps<'/m/[lang]'>) {
 
   const [cats, slides, feed] = await Promise.all([
     data.categories(lang),
-    data.feed(lang, { limit: 5, categoryId: t.m.sliderCategoryId }),
+    data.feed(lang, { limit: 12, categoryId: t.m.sliderCategoryId }),
     data.feed(lang, { limit: PAGE_SIZE }),
   ])
   const map = categoryMap(cats)
@@ -25,7 +25,7 @@ export default async function MobileHome({ params }: PageProps<'/m/[lang]'>) {
   return (
     <>
       <MSlider
-        posts={slides.map((p) => ({
+        posts={[...slides.filter((p) => p.image), ...slides.filter((p) => !p.image)].slice(0, 5).map((p) => ({
           ...p,
           href: postPath(p, map),
           date: formatDotted(p.published_at),

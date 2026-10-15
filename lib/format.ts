@@ -59,5 +59,5 @@ export function categoryMap(cats: Category[]) {
   return new Map(cats.map((c) => [c.id, c]))
 }
 
-/** DLE no_image.jpg, shown where a post has no picture. */
-export const NO_IMAGE = '/theme/images/no_image.jpg'
+/** Placeholder shown where a post has no picture. */
+export const NO_IMAGE = '/theme/images/no-image.svg'

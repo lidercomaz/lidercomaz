@@ -18,10 +18,12 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
 
   const [cats, latest, feed] = await Promise.all([
     data.categories(lang),
-    data.feed(lang, { limit: 8 }),
+    data.feed(lang, { limit: 16 }),
     data.feed(lang, { limit: PAGE_SIZE, mainOnly: true }),
   ])
   const map = categoryMap(cats)
+  // Visual blocks (top strip, slider) prefer posts that have a picture.
+  const withImage = [...latest.filter((p) => p.image), ...latest.filter((p) => !p.image)]
   const withHref = <T extends Parameters<typeof postPath>[0]>(p: T) => ({ ...p, href: postPath(p, map) })
 
   return (
@@ -29,7 +31,7 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
       {/* ust.tpl */}
       <section className="top-news">
         <div className="top-news-wrap">
-          {latest.slice(0, 5).map((p) => (
+          {withImage.slice(0, 5).map((p) => (
             <div key={p.id} className="top-news-item">
               <a href={postPath(p, map)}>
                 <div className="top-news-item-a">
@@ -46,7 +48,7 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
 
       <div className="site-top">
         <MainSlider
-          posts={latest.slice(0, 4).map((p) => ({ ...withHref(p), date: formatDate(p.published_at, lang) }))}
+          posts={withImage.slice(0, 4).map((p) => ({ ...withHref(p), date: formatDate(p.published_at, lang) }))}
           readMore={t.readMore}
         />
         {/* ozel.tpl */}
@@ -54,7 +56,7 @@ export default async function Home({ params }: PageProps<'/[lang]'>) {
           <h2 className="at-title">{t.feedTitle}</h2>
           <div className="a-posts-wrap">
             <div className="scrl">
-              {latest.map((p) => (
+              {latest.slice(0, 8).map((p) => (
                 <div key={p.id} className="a-post-item">
                   <a href={postPath(p, map)}>
                     <div className="a-post-image"><img src={p.image ?? NO_IMAGE} alt="" /></div>
