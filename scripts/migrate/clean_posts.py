@@ -99,6 +99,9 @@ class Sanitizer(HTMLParser):
 
 def sanitize(src: str) -> str:
     s = src.replace('\\"', '"').replace("\\'", "'")
+    # leftover BBCode bold typed by editors (sometimes unclosed: "[/b<br>")
+    s = re.sub(r'\[b\]', '<b>', s, flags=re.I)
+    s = re.sub(r'\[/b\]?', '</b>', s, flags=re.I)
     s = re.sub(r'<!--.*?-->', '', s, flags=re.S)
     p = Sanitizer()
     p.feed(s)
