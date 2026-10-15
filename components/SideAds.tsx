@@ -29,12 +29,20 @@ export function SideAds({ slot }: { slot: string }) {
       ins.setAttribute('data-ad-slot', slot)
       box.appendChild(ins)
     }
+    // runAinsyndication walks a live HTMLCollection while renaming items, so one pass fills
+    // only every other slot (the original page included the script once per banner).
+    const fill = () => {
+      for (let i = 0; i < 4 && document.getElementsByClassName('ainsyndication').length; i++) {
+        window.smartbee?.runAinsyndication?.()
+      }
+    }
     if (window.smartbee?.runAinsyndication) {
-      window.smartbee.runAinsyndication()
+      fill()
     } else if (!document.querySelector(`script[src="${SCRIPT}"]`)) {
       const s = document.createElement('script')
       s.src = SCRIPT
       s.async = true
+      s.onload = fill
       document.body.appendChild(s)
     }
   }, [slot])
