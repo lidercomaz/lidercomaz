@@ -231,7 +231,7 @@ export function SourcesPage() {
                     ))}
                   </td>
                   <td className="hide-sm">
-                    <select className="select" style={{ height: 30, width: 90 }} value={s.max_per_run} onChange={(e) => patch(s, { max_per_run: Number(e.target.value) })}>
+                    <select className="select" style={{ height: 30, width: 120 }} value={s.max_per_run} onChange={(e) => patch(s, { max_per_run: Number(e.target.value) })}>
                       {[1, 2, 3, 5, 8, 10].map((n) => <option key={n} value={n}>{n} xəbər</option>)}
                     </select>
                   </td>
@@ -263,7 +263,8 @@ export function SourcesPage() {
             </thead>
             <tbody>
               {log.map((r) => {
-                const [cls, label] = STATUS[r.status] ?? ['', r.status]
+                const retry = r.status === 'error' && r.error?.startsWith('⟳ ')
+                const [cls, label] = retry ? ['warn', 'Təkrar cəhd ediləcək'] : STATUS[r.status] ?? ['', r.status]
                 return (
                   <tr key={r.id}>
                     <td>
@@ -272,7 +273,7 @@ export function SourcesPage() {
                       ) : (
                         <span>{r.title}</span>
                       )}
-                      <div className="meta"><a href={r.url} target="_blank" rel="noopener">orijinal ↗</a>{r.error && ` · ${r.error}`}</div>
+                      <div className="meta"><a href={r.url} target="_blank" rel="noopener">orijinal ↗</a>{r.error && ` · ${r.error.replace(/^⟳ /, '')}`}</div>
                     </td>
                     <td className="hide-sm">{byId.get(r.source_id)?.name ?? '—'} <span className="meta">{byId.get(r.source_id)?.lang.toUpperCase()}</span></td>
                     <td><span className={`badge ${cls}`}>{label}</span></td>

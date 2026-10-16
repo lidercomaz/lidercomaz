@@ -2,7 +2,7 @@ import 'server-only'
 import { FinishReason, Type } from '@google/genai'
 import { z } from 'zod'
 import { plainText } from '../admin/content'
-import { TranslateError, gemini, geminiError, geminiModel } from '../admin/translate'
+import { TranslateError, generate } from '../admin/translate'
 import type { Lang } from '../types'
 
 const BACK = /[aıou]/
@@ -76,10 +76,7 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
       'Do not add facts, opinions or conclusions that are not in the original, and do not drop important details. Write a new title with the same meaning.'
     : 'Keep the original text and title as they are (only fix obvious typos and spacing).'
 
-  let response
-  try {
-    response = await gemini().models.generateContent({
-      model: geminiModel(),
+  const response = await generate({
       contents: JSON.stringify({ source: input.source, title: input.title, text }),
       config: {
         systemInstruction:
@@ -94,12 +91,8 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
         responseMimeType: 'application/json',
         responseSchema: SCHEMA,
         temperature: input.rewrite ? 0.7 : 0.1,
-        abortSignal: AbortSignal.timeout(90_000),
       },
-    })
-  } catch (err) {
-    geminiError(err)
-  }
+    }, 70_000)
 
   const reason = response.candidates?.[0]?.finishReason
   if (reason && reason !== FinishReason.STOP) throw new TranslateError(`Gemini xəbəri emal etmədi (${reason})`)

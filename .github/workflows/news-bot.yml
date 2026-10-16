@@ -20,7 +20,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.LIDER_API_TOKEN }}
         run: |
-          if [ -z "$TOKEN" ]; then echo "LIDER_API_TOKEN secret is not set"; exit 0; fi
+          if [ -z "$TOKEN" ]; then echo "::error::LIDER_API_TOKEN secret is not set (GitHub → Settings → Secrets and variables → Actions)"; exit 1; fi
           code=$(curl -sS -o out.json -w '%{http_code}' --max-time 320 -X POST \
             -H "Authorization: Bearer $TOKEN" https://lider.com.az/api/cron/import)
           cat out.json; echo

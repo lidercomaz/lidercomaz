@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { adminDb } from '../admin/db'
 import { storeImageFromUrl } from '../admin/images'
 import { InputError, createStory, listCategories } from '../admin/posts'
-import { canTranslate } from '../admin/translate'
+import { TranslateError, canTranslate } from '../admin/translate'
 import type { Lang } from '../types'
 import { type FeedItem, discoverFeed, extractArticle, fetchText, paragraphs, parseFeed } from './fetch'
 import { rewriteStory } from './rewrite'
@@ -178,6 +178,18 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
   }
 }
 
+/** Prefix of errors that are temporary (Gemini busy, timeouts); such items are taken again on later runs. */
+const RETRY_MARK = '⟳ '
+const TEMPORARY_ERROR = /^⟳ |\b(503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand|overloaded)\b|vaxt bitdi|məşğuldur|limiti dolub|açılmadı/i
+
+/** Temporary failures are retried for a day; a run that died mid-item is picked up after 15 minutes. */
+function shouldRetry(row: { status: string; error: string | null; created_at: string; updated_at: string }) {
+  const age = Date.now() - Date.parse(row.created_at)
+  if (row.status === 'error') return age < 864e5 && TEMPORARY_ERROR.test(row.error ?? '')
+  if (row.status === 'processing') return Date.now() - Date.parse(row.updated_at) > 15 * 60e3 && age < 864e5
+  return false
+}
+
 export interface RunReport {
   sources: number
   published: number
@@ -208,22 +220,29 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
     try {
       const { text, finalUrl } = await fetchText(source.feed_url)
       const feed = parseFeed(text, finalUrl).map((i) => ({ ...i, url: normalizeUrl(i.url) }))
-      const known = new Set(
-        must<{ url: string }[]>(await adminDb().from('source_items').select('url').eq('source_id', source.id).in('url', feed.map((i) => i.url))).map((r) => r.url),
+      const rows = must<{ id: number; url: string; status: string; error: string | null; created_at: string; updated_at: string }[]>(
+        await adminDb().from('source_items').select('id,url,status,error,created_at,updated_at').eq('source_id', source.id).in('url', feed.map((i) => i.url)),
       )
-      const fresh = feed.filter((i) => !known.has(i.url)).slice(0, source.max_per_run)
+      const byUrl = new Map(rows.map((r) => [r.url, r]))
+      const fresh = feed.filter((i) => !byUrl.has(i.url) || shouldRetry(byUrl.get(i.url)!)).slice(0, source.max_per_run)
       const categories = cats.map((c) => ({ id: c.id, slug: c.slug, name: source.lang === 'az' ? c.az : c.ru }))
 
       for (const item of fresh) {
         if (Date.now() - started > budgetMs) break
-        // Claim the item first: a parallel run hitting the same url gets a conflict and skips it.
-        const claim = await adminDb().from('source_items').insert({ source_id: source.id, url: item.url, title: item.title, status: 'processing' }).select('id').single()
-        if (claim.error) continue
+        // Claim the item first, so a parallel run skips it: a new row (unique url) or an atomic
+        // status change of a row that failed temporarily.
+        const prev = byUrl.get(item.url)
+        const claim = prev
+          ? await adminDb().from('source_items').update({ status: 'processing', error: null, updated_at: new Date().toISOString() })
+              .eq('id', prev.id).eq('status', prev.status).eq('updated_at', prev.updated_at).select('id').single()
+          : await adminDb().from('source_items').insert({ source_id: source.id, url: item.url, title: item.title, status: 'processing' }).select('id').single()
+        if (claim.error || !claim.data) continue
         let outcome: Outcome
         try {
           outcome = await processItem(source, item, categories)
         } catch (err) {
-          outcome = { status: 'error', error: err instanceof Error ? err.message : String(err) }
+          const retry = err instanceof TranslateError && err.retryable
+          outcome = { status: 'error', error: `${retry ? RETRY_MARK : ''}${err instanceof Error ? err.message : String(err)}` }
         }
         await adminDb().from('source_items').update({
           status: outcome.status,
