@@ -7,5 +7,5 @@ export const maxDuration = 300
 export const POST = adminRoute(async (req) => {
   const body = await req.json().catch(() => ({}))
   const sourceId = Number(body.source_id) || undefined
-  return json(await runImport({ sourceId, budgetMs: 240_000 }))
+  return json(await runImport({ sourceId, budgetMs: 200_000 }))
 })

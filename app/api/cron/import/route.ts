@@ -8,7 +8,7 @@ export const maxDuration = 300
  * with `Authorization: Bearer <ADMIN_API_TOKEN>`.
  */
 async function run() {
-  const report = await runImport({ budgetMs: 240_000 })
+  const report = await runImport({ budgetMs: 200_000 })
   console.log('[news-bot]', JSON.stringify({ ...report, details: report.details.length }))
   return json(report)
 }

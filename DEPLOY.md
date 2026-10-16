@@ -81,7 +81,7 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 ### Xəbər botu (Mənbələr)
 
 - Panel → **Mənbələr (bot)**: AZ saytı üçün Azərbaycan dilli, RU saytı üçün rus dilli saytlar əlavə olunur (dil avtomatik yoxlanılır, RSS lenti özü tapılır).
-- Bot hər 10 dəqiqədən bir ([.github/workflows/news-bot.yml](.github/workflows/news-bot.yml)) yeni xəbərləri götürür, Gemini ilə öz sözlərimizlə yazır, əvvəlinə istinad cümləsini qoyur: AZ — "Lider.com.az Milli.az-a istinadən bildirir ki, …", RU — "Как сообщает Lider.com.az со ссылкой на …".
+- Bot hər 10 dəqiqədən bir ([.github/workflows/news-bot.yml](.github/workflows/news-bot.yml)) yeni xəbərləri götürür, Gemini ilə öz sözlərimizlə yazır, əvvəlinə istinad cümləsini qoyur: AZ — "Lider.com.az istinadən bildirir ki, …", RU — "Как сообщает Lider.com.az, …". Mənbə saytın (və digər media qurumlarının) adı mətndə yazılmır.
 - Hər mənbə üçün: aktiv/deaktiv, "öz sözlərimizlə yaz", "digər sayta da tərcümə et", "avtomatik dərc et" (söndürülsə qaralama), "şəkli götür", hər yoxlamada neçə xəbər.
 - GitHub → Settings → Secrets and variables → Actions → `LIDER_API_TOKEN` = Vercel-dəki `ADMIN_API_TOKEN` ilə eyni dəyər.
 - Bunun üçün Supabase-də [`supabase/migrations/002_sources.sql`](supabase/migrations/002_sources.sql) işlədilməlidir.

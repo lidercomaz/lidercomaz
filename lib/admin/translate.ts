@@ -104,7 +104,8 @@ export async function translatePost(from: Lang, to: Lang, src: TranslatableField
           'Keep every HTML tag and attribute exactly as it is; translate only the human-readable text (including img alt text). ' +
           'Keep names of people, places and organisations in the standard spelling used by media in the target language. ' +
           'Do not add, drop or summarise anything. `title_extra` is a short suffix shown after the title; translate it, or return null when the input is null. ' +
-          'The attribution phrase has fixed forms: Azerbaijani "Lider.com.az X-a istinadən bildirir ki, …" ⇄ Russian "Как сообщает Lider.com.az со ссылкой на X, …" (X is the source name, unchanged; use the correct Azerbaijani dative suffix -a/-ə/-ya/-yə).',
+          'The attribution phrase has fixed forms: Azerbaijani "Lider.com.az istinadən bildirir ki, …" ⇄ Russian "Как сообщает Lider.com.az, …". ' +
+          'Never add the name of another news site or agency.',
         responseMimeType: 'application/json',
         responseSchema: SCHEMA,
         temperature: 0.2,

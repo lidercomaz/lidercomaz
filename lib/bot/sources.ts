@@ -95,9 +95,6 @@ export async function addSource(input: z.infer<typeof SourceInput>) {
   const source = must<Source>(
     await adminDb().from('sources').insert({ ...input, feed_url }).select('*').single(),
   )
-  // Older stories in the feed are marked as seen; the newest two are left for the first run.
-  const old = items.slice(2).map((i) => ({ source_id: source.id, url: normalizeUrl(i.url), title: i.title, status: 'seen' }))
-  if (old.length) must(await adminDb().from('source_items').upsert(old, { onConflict: 'source_id,url', ignoreDuplicates: true }))
   return { source, feedItems: items.length }
 }
 
@@ -178,6 +175,8 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
   }
 }
 
+const CONCURRENCY = 3
+
 /** Prefix of errors that are temporary (Gemini busy, timeouts); such items are taken again on later runs. */
 const RETRY_MARK = '⟳ '
 const TEMPORARY_ERROR = /^⟳ |\b(503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand|overloaded)\b|vaxt bitdi|məşğuldur|limiti dolub|açılmadı/i
@@ -186,6 +185,8 @@ const TEMPORARY_ERROR = /^⟳ |\b(503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high de
 function shouldRetry(row: { status: string; error: string | null; created_at: string; updated_at: string }) {
   const age = Date.now() - Date.parse(row.created_at)
   if (row.status === 'error') return age < 864e5 && TEMPORARY_ERROR.test(row.error ?? '')
+  // 'seen' rows come from an older version that skipped the backlog when a source was added.
+  if (row.status === 'seen') return true
   if (row.status === 'processing') return Date.now() - Date.parse(row.updated_at) > 15 * 60e3 && age < 864e5
   return false
 }
@@ -224,11 +225,15 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
         await adminDb().from('source_items').select('id,url,status,error,created_at,updated_at').eq('source_id', source.id).in('url', feed.map((i) => i.url)),
       )
       const byUrl = new Map(rows.map((r) => [r.url, r]))
-      const fresh = feed.filter((i) => !byUrl.has(i.url) || shouldRetry(byUrl.get(i.url)!)).slice(0, source.max_per_run)
+      // Today's stories only (last 24 h), newest first, up to the per-source count.
+      const since = Date.now() - 864e5
+      const fresh = feed
+        .filter((i) => !i.publishedAt || !(Date.parse(i.publishedAt) < since))
+        .filter((i) => !byUrl.has(i.url) || shouldRetry(byUrl.get(i.url)!))
+        .slice(0, source.max_per_run)
       const categories = cats.map((c) => ({ id: c.id, slug: c.slug, name: source.lang === 'az' ? c.az : c.ru }))
 
-      for (const item of fresh) {
-        if (Date.now() - started > budgetMs) break
+      const handle = async (item: FeedItem) => {
         // Claim the item first, so a parallel run skips it: a new row (unique url) or an atomic
         // status change of a row that failed temporarily.
         const prev = byUrl.get(item.url)
@@ -236,7 +241,7 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
           ? await adminDb().from('source_items').update({ status: 'processing', error: null, updated_at: new Date().toISOString() })
               .eq('id', prev.id).eq('status', prev.status).eq('updated_at', prev.updated_at).select('id').single()
           : await adminDb().from('source_items').insert({ source_id: source.id, url: item.url, title: item.title, status: 'processing' }).select('id').single()
-        if (claim.error || !claim.data) continue
+        if (claim.error || !claim.data) return
         let outcome: Outcome
         try {
           outcome = await processItem(source, item, categories)
@@ -258,6 +263,17 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
         else report.errors++
         report.details.push({ source: source.name, title: outcome.title ?? item.title, status: outcome.status, error: outcome.error })
       }
+
+      // Three stories at a time; no new one starts once the time budget is spent (the rest waits for the next run).
+      const queue = [...fresh]
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+          for (let item = queue.shift(); item; item = queue.shift()) {
+            if (Date.now() - started > budgetMs) return
+            await handle(item)
+          }
+        }),
+      )
     } catch (err) {
       if (err instanceof SetupError) throw err
       sourceError = err instanceof Error ? err.message : String(err)

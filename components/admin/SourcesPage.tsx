@@ -98,7 +98,7 @@ export function SourcesPage() {
         method: 'POST',
         json: { lang, name: form.name, site_url: form.site_url, category_id: form.category_id || null, cross_post: form.cross_post, auto_publish: form.auto_publish, rewrite: form.rewrite },
       })
-      setNotice(`"${r.source.name}" əlavə olundu. RSS lenti tapıldı (${r.feedItems} xəbər). Bot bundan sonra yeni xəbərləri çəkəcək; ilk yoxlamada ən son 2 xəbəri götürəcək.`)
+      setNotice(`"${r.source.name}" əlavə olundu. RSS lenti tapıldı (${r.feedItems} xəbər). "İndi yoxla" basanda günün ən son xəbərlərini (seçdiyiniz say qədər) çəkəcək.`)
       setForm({ ...form, name: '', site_url: '' })
       load()
     } catch (err) {
@@ -160,7 +160,7 @@ export function SourcesPage() {
 
       <p className="hint" style={{ marginTop: -8 }}>
         Bot hər 10 dəqiqədən bir {lang === 'az' ? 'Azərbaycan dilli' : 'rus dilli'} mənbələrdən yeni xəbərləri götürür, öz sözlərimizlə yazır və əvvəlinə{' '}
-        <b>{lang === 'az' ? '"Lider.com.az Milli.az-a istinadən bildirir ki, …"' : '"Как сообщает Lider.com.az со ссылкой на …"'}</b> cümləsini əlavə edib{' '}
+        <b>{lang === 'az' ? '"Lider.com.az istinadən bildirir ki, …"' : '"Как сообщает Lider.com.az, …"'}</b> cümləsini əlavə edib (mənbə saytın adı heç yerdə yazılmır){' '}
         {lang === 'az' ? 'lider.com.az' : 'ru.lider.com.az'}-da dərc edir. Bu siyahıya yalnız {lang === 'az' ? 'Azərbaycan dilli' : 'rus dilli'} saytlar əlavə edin.
       </p>
 
@@ -171,7 +171,7 @@ export function SourcesPage() {
         <h3 style={{ marginTop: 0 }}>Yeni mənbə ({lang.toUpperCase()} saytı üçün)</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <label className="field">
-            <span>Ad (istinad cümləsində yazılır)</span>
+            <span>Ad (yalnız paneldə görünür)</span>
             <input className="input" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={lang === 'az' ? 'Milli.az' : 'Report.az'} />
           </label>
           <label className="field">
@@ -232,7 +232,7 @@ export function SourcesPage() {
                   </td>
                   <td className="hide-sm">
                     <select className="select" style={{ height: 30, width: 120 }} value={s.max_per_run} onChange={(e) => patch(s, { max_per_run: Number(e.target.value) })}>
-                      {[1, 2, 3, 5, 8, 10].map((n) => <option key={n} value={n}>{n} xəbər</option>)}
+                      {[1, 2, 3, 5, 8, 10, 15, 20].map((n) => <option key={n} value={n}>{n} xəbər</option>)}
                     </select>
                   </td>
                   <td className="hide-sm">

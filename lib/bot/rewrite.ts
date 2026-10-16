@@ -5,20 +5,10 @@ import { plainText } from '../admin/content'
 import { TranslateError, generate } from '../admin/translate'
 import type { Lang } from '../types'
 
-const BACK = /[aıou]/
-const VOWEL = /[aıoueəiöü]/
-
-/** Azerbaijani dative after a name: "Milli.az" → "Milli.az-a", "APA" → "APA-ya", "Trend" → "Trend-ə". */
-export function azDative(name: string) {
-  const word = name.toLocaleLowerCase('az').replace(/[^a-zəıöüğşç]+$/i, '')
-  const lastVowel = [...word].reverse().find((c) => VOWEL.test(c)) ?? 'a'
-  const suffix = BACK.test(lastVowel) ? 'a' : 'ə'
-  return `${name}-${VOWEL.test(word.at(-1) ?? '') ? 'y' : ''}${suffix}`
-}
-
-/** Fixed opening of every imported story. */
-export function attribution(lang: Lang, source: string) {
-  return lang === 'az' ? `Lider.com.az ${azDative(source)} istinadən bildirir ki,` : `Как сообщает Lider.com.az со ссылкой на ${source},`
+/** Fixed opening of every imported story; the source site is never named. */
+export const ATTRIBUTION: Record<Lang, string> = {
+  az: 'Lider.com.az istinadən bildirir ki,',
+  ru: 'Как сообщает Lider.com.az,',
 }
 
 const Output = z.object({
@@ -66,7 +56,7 @@ const escape = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};
  * opening with the attribution sentence, in the language of the target site. Returns null when it is not news.
  */
 export async function rewriteStory(input: RewriteInput): Promise<Rewritten | null> {
-  const opening = attribution(input.lang, input.source)
+  const opening = ATTRIBUTION[input.lang]
   const text = input.paragraphs.join('\n\n').slice(0, 30_000)
   if (text.length < 120) return null
 
@@ -77,14 +67,18 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
     : 'Keep the original text and title as they are (only fix obvious typos and spacing).'
 
   const response = await generate({
-      contents: JSON.stringify({ source: input.source, title: input.title, text }),
+      contents: JSON.stringify({ title: input.title, text }),
       config: {
         systemInstruction:
-          `You are a senior editor at Lider.com.az, an independent Azerbaijani news portal. You receive a news story published by "${input.source}". ` +
+          `You are a senior editor at Lider.com.az, an independent Azerbaijani news portal. You receive a news story taken from another news site ("${input.source}"). ` +
           `Output language: ${LANG_NAME[input.lang]} (literary, grammatically correct, news-agency register; translate if the input is in another language). ` +
           `${task} ` +
           `The first paragraph MUST begin with exactly: "${opening}" and continue that sentence with the main news (lowercase after the comma). ` +
-          'Remove anything that is not part of the story: bylines, "read also" links, the source\'s own attribution lines, social-media prompts, ads, photo credits. ' +
+          'The story is published as Lider.com.az\'s own: NEVER mention the site it was taken from or any other news site, agency or media outlet ' +
+          `(e.g. ${input.source}, APA, Report, Trend, Qafqazinfo, Milli.az, Oxu.az, Sputnik, TASS, RIA Novosti, Interfax) — not in the title, not in the text. ` +
+          'Drop their attribution phrases entirely ("X xəbər verir", "X-a istinadən", "X-ın məlumatına görə", "сообщает X", "по данным X", "передает X") and keep the fact itself. ' +
+          'Official sources stay (ministries, agencies of state, officials, courts, press services quoted in the story). ' +
+          'Remove anything that is not part of the story: bylines, "read also" links, social-media prompts, ads, photo credits. ' +
           'Return the body as an array of paragraphs (plain text, no HTML, no markdown). ' +
           `Pick the best category slug from: ${input.categories.map((c) => `${c.slug} (${c.name})`).join(', ')}; null if none fits. ` +
           'Set skip=true (with skip_reason) for adverts, promotions, horoscopes, lottery results or pages with no real news content.',
