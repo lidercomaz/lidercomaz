@@ -6,6 +6,7 @@ import { InputError, createStory, listCategories } from '../admin/posts'
 import { TranslateError, canTranslate } from '../admin/translate'
 import type { Lang } from '../types'
 import { type FeedItem, discoverFeed, extractArticle, fetchText, paragraphs, parseFeed } from './fetch'
+import { removeDuplicates } from './dedupe'
 import { rewriteStory } from './rewrite'
 
 export interface Source {
@@ -127,14 +128,23 @@ export async function recentItems(limit = 50) {
 
 type Outcome = { status: 'published' | 'draft' | 'skipped' | 'error'; post_lang?: Lang; post_id?: number; error?: string; title?: string }
 
+/** Absolute ceiling of new posts per day on both sites together, whatever the settings say. */
+export const MAX_POSTS_PER_DAY = 60
+
 /**
  * Daily ceiling of new posts per site, so the database (Supabase free plan: 500 MB) lasts for years:
- * a post takes ~5 KB with its indexes, so 30 posts a day ≈ 55 MB a year. Manual posts are never blocked,
- * but they count towards the day's total.
+ * a post takes ~6 KB with its indexes (measured), so 50 posts a day ≈ 105 MB a year. Manual posts are never
+ * blocked, but they count towards the day's total. Defaults AZ 35 + RU 15; the sum never exceeds 60.
  */
 export function dailyLimit(lang: Lang) {
-  const raw = Number(process.env[lang === 'az' ? 'BOT_DAILY_LIMIT_AZ' : 'BOT_DAILY_LIMIT_RU'])
-  return Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : lang === 'az' ? 20 : 10
+  const read = (l: Lang) => {
+    const raw = Number(process.env[l === 'az' ? 'BOT_DAILY_LIMIT_AZ' : 'BOT_DAILY_LIMIT_RU'])
+    return Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : l === 'az' ? 35 : 15
+  }
+  const az = read('az')
+  const ru = read('ru')
+  const own = lang === 'az' ? az : ru
+  return az + ru > MAX_POSTS_PER_DAY ? Math.floor((own * MAX_POSTS_PER_DAY) / (az + ru)) : own
 }
 
 /** Start of today in Baku (UTC+4, no DST). */
@@ -170,7 +180,13 @@ export function sameStory(a: Set<string>, b: Set<string>) {
   return shared >= 3 && shared / (a.size + b.size - shared) >= 0.6
 }
 
-async function processItem(source: Source, item: FeedItem, categories: { id: number; slug: string; name: string }[], quota: Quota): Promise<Outcome> {
+async function processItem(
+  source: Source,
+  item: FeedItem,
+  categories: { id: number; slug: string; name: string }[],
+  quota: Quota,
+  recentTitles: string[],
+): Promise<Outcome> {
   // Full text: from the feed when it carries it, otherwise from the article page.
   let title = item.title
   let paras = item.content ? paragraphs(item.content) : []
@@ -190,8 +206,11 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
     paragraphs: paras,
     rewrite: source.rewrite,
     categories: categories.map((c) => ({ slug: c.slug, name: c.name })),
+    recentTitles,
   })
   if (!story) return { status: 'skipped', error: 'Xəbər deyil (reklam/boş səhifə)' }
+  if (story.duplicateOf) return { status: 'skipped', error: `Dublikat: "${story.duplicateOf.slice(0, 150)}" artıq dərc olunub` }
+  recentTitles.unshift(story.title)
 
   // Pictures go to imgbb; a failed upload publishes the story without a picture.
   let pictureError: string | null = null
@@ -228,6 +247,8 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
 }
 
 const CONCURRENCY = 3
+/** The bot stops when the database passes 90 % of the free plan's 500 MB. */
+const DB_STOP_BYTES = 450 * 1024 * 1024
 
 /** Prefix of errors that are temporary (Gemini busy, timeouts); such items are taken again on later runs. */
 const RETRY_MARK = '⟳ '
@@ -252,6 +273,8 @@ export interface RunReport {
   details: { source: string; title: string; status: string; error?: string }[]
   /** Set when a site reached its daily limit during this run. */
   limited: string | null
+  /** Duplicate stories (same event from two sources) deleted in this run. */
+  duplicatesRemoved: number
 }
 
 /**
@@ -261,8 +284,23 @@ export interface RunReport {
 export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: number; budgetMs?: number } = {}): Promise<RunReport> {
   if (!canTranslate()) throw new SetupError('Bot üçün GEMINI_API_KEY təyin edilməyib')
   const started = Date.now()
-  const report: RunReport = { sources: 0, published: 0, drafts: 0, skipped: 0, errors: 0, details: [], limited: null }
+  const report: RunReport = { sources: 0, published: 0, drafts: 0, skipped: 0, errors: 0, details: [], limited: null, duplicatesRemoved: 0 }
   const [azToday, ruToday] = await Promise.all([postsToday('az'), postsToday('ru')])
+  // Stop before the database fills up (Supabase free plan: 500 MB).
+  const size = await adminDb().rpc('storage_usage')
+  const dbBytes = (size.data as { db_bytes?: number } | null)?.db_bytes
+  if (dbBytes && dbBytes > DB_STOP_BYTES) {
+    report.limited = `Baza ${Math.round(dbBytes / 1048576)} MB-dır (limit 500 MB): bot dayandırıldı.`
+    return report
+  }
+  // Headlines on each site in the last 36 h, for Gemini's same-event check.
+  const since36 = new Date(Date.now() - 36 * 3600e3).toISOString()
+  const publishedTitles: Record<Lang, string[]> = { az: [], ru: [] }
+  for (const lang of ['az', 'ru'] as const) {
+    publishedTitles[lang] = must<{ title: string }[]>(
+      await adminDb().from('posts').select('title').eq('lang', lang).gte('created_at', since36).order('created_at', { ascending: false }).limit(150),
+    ).map((r) => r.title)
+  }
   // Headlines taken in the last 36 h by any source of the same language: the same story is published once.
   const langOf = new Map(must<{ id: number; lang: Lang }[]>(await adminDb().from('sources').select('id,lang')).map((r) => [r.id, r.lang]))
   const recentTitles: Record<Lang, Set<string>[]> = { az: [], ru: [] }
@@ -329,7 +367,7 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
         recentTitles[source.lang].push(words)
         let outcome: Outcome
         try {
-          outcome = await processItem(source, item, categories, quota)
+          outcome = await processItem(source, item, categories, quota, publishedTitles[source.lang])
         } catch (err) {
           const retry = err instanceof TranslateError && err.retryable
           outcome = { status: 'error', error: `${retry ? RETRY_MARK : ''}${err instanceof Error ? err.message : String(err)}` }
@@ -367,6 +405,15 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
       report.details.push({ source: source.name, title: '—', status: 'error', error: sourceError })
     }
     await adminDb().from('sources').update({ last_checked_at: new Date().toISOString(), last_error: sourceError }).eq('id', source.id)
+  }
+  // Same event published twice (e.g. from two sources in parallel): keep one, delete the later bot copies.
+  if (!sourceId && Date.now() - started < budgetMs + 20_000) {
+    for (const lang of ['az', 'ru'] as const) {
+      report.duplicatesRemoved += await removeDuplicates(lang).catch((e) => {
+        console.error('[dedupe]', e)
+        return 0
+      })
+    }
   }
   // Keep the bot's bookkeeping small: feeds only carry recent stories, so a week of history is enough.
   await adminDb().from('source_items').delete().lt('created_at', new Date(Date.now() - 7 * 864e5).toISOString())

@@ -43,6 +43,7 @@ interface RunReport {
   errors: number
   details: { source: string; title: string; status: string; error?: string }[]
   limited: string | null
+  duplicatesRemoved: number
 }
 
 const STATUS: Record<string, [string, string]> = {
@@ -133,7 +134,7 @@ export function SourcesPage() {
     setNotice(null)
     try {
       const r = await api<RunReport>('/api/admin/sources/run', { method: 'POST', json: { source_id: id } })
-      setNotice(`Yoxlanıldı: ${r.sources} mənbə · dərc olundu ${r.published} · qaralama ${r.drafts} · keçildi ${r.skipped} · xəta ${r.errors}${r.limited ? ` · ${r.limited}` : ''}`)
+      setNotice(`Yoxlanıldı: ${r.sources} mənbə · dərc olundu ${r.published} · qaralama ${r.drafts} · keçildi ${r.skipped} · xəta ${r.errors}${r.duplicatesRemoved ? ` · silinən dublikat ${r.duplicatesRemoved}` : ''}${r.limited ? ` · ${r.limited}` : ''}`)
       load()
       setUsageKey((k) => k + 1)
     } catch (e) {

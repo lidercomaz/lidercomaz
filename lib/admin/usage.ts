@@ -5,8 +5,8 @@ import { adminDb } from './db'
 const MB = 1024 * 1024
 /** Supabase free plan. */
 export const LIMITS = { dbBytes: 500 * MB, storageBytes: 1024 * MB }
-/** A post with its share of the indexes (measured on this database). */
-const BYTES_PER_POST = 5 * 1024
+/** A post with its share of the indexes and TOAST storage (measured on this database: ~5.9 KB). */
+const BYTES_PER_POST = 6 * 1024
 
 export async function usage() {
   const db = adminDb()
@@ -20,6 +20,8 @@ export async function usage() {
     postsToday('ru'),
   ])
   const posts = total.count ?? 0
+  // Measured size per post when the SQL helper is installed (posts table incl. indexes / posts).
+  const perPost = sizes && posts ? Math.max(BYTES_PER_POST / 2, sizes.posts_bytes / posts) : BYTES_PER_POST
   // Without the SQL helper (003_usage.sql) the size is estimated from the number of posts.
   // Base: Postgres itself plus the Storage metadata of the image archive (measured ≈ 55 MB).
   const dbBytes = sizes?.db_bytes ?? 55 * MB + posts * BYTES_PER_POST
@@ -35,7 +37,8 @@ export async function usage() {
     today: { az: azToday, ru: ruToday },
     limits: { az: dailyLimit('az'), ru: dailyLimit('ru'), dbBytes: LIMITS.dbBytes, storageBytes: LIMITS.storageBytes },
     /** Years until 95 % of the database is used, at the last week's pace (capped by the daily limits). */
-    yearsLeft: cappedPerDay > 0 ? Math.round((room / (cappedPerDay * BYTES_PER_POST) / 365) * 10) / 10 : null,
-    yearsAtLimit: Math.round((room / ((dailyLimit('az') + dailyLimit('ru')) * BYTES_PER_POST) / 365) * 10) / 10,
+    yearsLeft: cappedPerDay > 0 ? Math.round((room / (cappedPerDay * perPost) / 365) * 10) / 10 : null,
+    yearsAtLimit: Math.round((room / ((dailyLimit('az') + dailyLimit('ru')) * perPost) / 365) * 10) / 10,
+    bytesPerPost: Math.round(perPost),
   }
 }

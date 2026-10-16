@@ -13,6 +13,7 @@ interface Usage {
   limits: { az: number; ru: number; dbBytes: number; storageBytes: number }
   yearsLeft: number | null
   yearsAtLimit: number
+  bytesPerPost: number
 }
 
 const mb = (b: number) => `${Math.round(b / 1048576)} MB`
@@ -40,7 +41,7 @@ export function UsageCard({ refreshKey = 0 }: { refreshKey?: number }) {
         <div className="meta">Baza (Supabase, pulsuz plan)</div>
         <b>{mb(u.dbBytes)} / {mb(u.limits.dbBytes)}</b>{!u.measured && <span className="meta"> (təxmini)</span>}
         <Bar value={u.dbBytes} max={u.limits.dbBytes} />
-        <div className="meta">{u.posts.toLocaleString('az')} xəbər · son 7 gündə gündə ~{u.perDay}</div>
+        <div className="meta">{u.posts.toLocaleString('az')} xəbər · bir xəbər ~{(u.bytesPerPost / 1024).toFixed(1)} KB · son 7 gündə gündə ~{u.perDay}</div>
       </div>
       {u.storageBytes !== null && (
         <div>
@@ -54,7 +55,7 @@ export function UsageCard({ refreshKey = 0 }: { refreshKey?: number }) {
         <div className="meta">Bu gün əlavə olunub / günlük limit</div>
         <b>AZ {u.today.az}/{u.limits.az} · RU {u.today.ru}/{u.limits.ru}</b>
         <Bar value={u.today.az + u.today.ru} max={u.limits.az + u.limits.ru} />
-        <div className="meta">Limit dolanda bot növbəti günə qədər dayanır</div>
+        <div className="meta">Limit dolanda bot növbəti günə qədər dayanır (gündə ən çox 60). Baza 450 MB-a çatsa, bot tam dayanır.</div>
       </div>
       <div>
         <div className="meta">Baza nə qədər çatar</div>

@@ -88,10 +88,10 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 
 ### Supabase limitləri (pulsuz plan) — necə qorunur
 
-- **Baza (500 MB):** bot günlük limitlə işləyir — AZ 20, RU 10 xəbər (`BOT_DAILY_LIMIT_AZ`, `BOT_DAILY_LIMIT_RU`; əl ilə əlavə olunan xəbərlər bloklanmır, amma günlük saya daxildir). Bir xəbər ~5 KB tutur: 30 xəbər/gün ≈ 55 MB/il ⇒ baza ~7–8 il çatır. Botun texniki qeydləri 7 gündən sonra silinir. Paneldə **Mənbələr** səhifəsində yaddaş göstəricisi var; dəqiq ölçü üçün [`supabase/migrations/003_usage.sql`](supabase/migrations/003_usage.sql) işlədin.
+- **Baza (500 MB):** bot günlük limitlə işləyir — AZ 35, RU 15 xəbər (`BOT_DAILY_LIMIT_AZ`, `BOT_DAILY_LIMIT_RU`; cəmi heç vaxt 60-dan çox olmur; əl ilə əlavə olunan xəbərlər bloklanmır, amma günlük saya daxildir). Bir xəbər ~6 KB tutur: 50 xəbər/gün ≈ 105 MB/il ⇒ boş yer ~3,5–4 il çatır; 30/gün ≈ 6 il. Baza 450 MB-a çatsa, bot özü dayanır. Botun texniki qeydləri 7 gündən sonra silinir. Paneldə **Mənbələr** səhifəsində yaddaş göstəricisi var; dəqiq ölçü üçün [`supabase/migrations/003_usage.sql`](supabase/migrations/003_usage.sql) işlədin.
 - **Fayllar (1 GB):** yeni şəkillər imgbb-yə gedir, Supabase-də yalnız köhnə arxiv qalır (~470 MB).
 - **Trafik (5 GB/ay):** Supabase sorğuları Vercel data keşində saxlanılır (kateqoriyalar 1 gün, lentlər 10 dəq, xəbər 1 saat); yeni xəbər/redaktə keşi dərhal yeniləyir. Arxiv şəkilləri `/img/…` ilə CDN-də 1 il keşlənir.
-- Bot eyni hadisəni iki mənbədən götürmür (başlıq oxşarlığı yoxlanılır).
+- Bot eyni hadisəni iki dəfə dərc etmir: dərcdən əvvəl Gemini son 36 saatın başlıqları ilə müqayisə edir; hər yoxlamanın sonunda dublikatlar tapılıb sonrakı bot nüsxələri (tərcüməsi ilə) silinir. Paneldən yazılan xəbərlər silinmir.
 
 ### Bir dəfəlik: tərcümələri bir-birinə bağlamaq
 
@@ -107,7 +107,7 @@ Supabase → SQL Editor-da [`supabase/migrations/001_admin.sql`](supabase/migrat
 | `ADMIN_API_TOKEN` | Bot açarı (ən azı 24 simvol) |
 | `IMGBB_API_KEY` | Yeni şəkillərin imgbb-yə yüklənməsi (vacib) |
 | `GEMINI_API_KEY` | Avtomatik AZ ↔ RU tərcümə, Google Gemini (istəyə görə) |
-| `BOT_DAILY_LIMIT_AZ` / `BOT_DAILY_LIMIT_RU` | Botun günlük limiti (default 20 / 10) |
+| `BOT_DAILY_LIMIT_AZ` / `BOT_DAILY_LIMIT_RU` | Botun günlük limiti (default 35 / 15, cəmi maks. 60) |
 | `GEMINI_MODEL` | Gemini modeli (default `gemini-flash-latest`) |
 
 Dəyişdirmək: Vercel → Project → Settings → Environment Variables, sonra **Redeploy**.

@@ -12,6 +12,7 @@ export const ATTRIBUTION: Record<Lang, string> = {
 }
 
 const Output = z.object({
+  duplicate_of: z.number().int().nullable(),
   skip: z.boolean(),
   skip_reason: z.string().nullable(),
   title: z.string(),
@@ -22,14 +23,15 @@ const Output = z.object({
 const SCHEMA = {
   type: Type.OBJECT,
   properties: {
+    duplicate_of: { type: Type.INTEGER, nullable: true, description: 'number of the recent headline that reports the same news event, or null' },
     skip: { type: Type.BOOLEAN, description: 'true when the text is not a news story (advert, promo, horoscope, empty page) or is unusable' },
     skip_reason: { type: Type.STRING, nullable: true },
     title: { type: Type.STRING },
     paragraphs: { type: Type.ARRAY, items: { type: Type.STRING } },
     category: { type: Type.STRING, nullable: true },
   },
-  required: ['skip', 'skip_reason', 'title', 'paragraphs', 'category'],
-  propertyOrdering: ['skip', 'skip_reason', 'title', 'paragraphs', 'category'],
+  required: ['duplicate_of', 'skip', 'skip_reason', 'title', 'paragraphs', 'category'],
+  propertyOrdering: ['duplicate_of', 'skip', 'skip_reason', 'title', 'paragraphs', 'category'],
 }
 
 const LANG_NAME: Record<Lang, string> = { az: 'Azerbaijani', ru: 'Russian' }
@@ -41,9 +43,13 @@ export interface RewriteInput {
   paragraphs: string[]
   rewrite: boolean
   categories: { slug: string; name: string }[]
+  /** Headlines already published on the target site in the last 36 h (duplicate check). */
+  recentTitles: string[]
 }
 
 export interface Rewritten {
+  /** Set when the story repeats an already published one; nothing else is filled in then. */
+  duplicateOf: string | null
   title: string
   html: string
   category: string | null
@@ -67,7 +73,11 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
     : 'Keep the original text and title as they are (only fix obvious typos and spacing).'
 
   const response = await generate({
-      contents: JSON.stringify({ title: input.title, text }),
+      contents: JSON.stringify({
+        recent_headlines: input.recentTitles.slice(0, 150).map((t, i) => `${i + 1}. ${t}`),
+        title: input.title,
+        text,
+      }),
       config: {
         systemInstruction:
           `You are a senior editor at Lider.com.az, an independent Azerbaijani news portal. You receive a news story taken from another news site ("${input.source}"). ` +
@@ -81,7 +91,10 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
           'Remove anything that is not part of the story: bylines, "read also" links, social-media prompts, ads, photo credits. ' +
           'Return the body as an array of paragraphs (plain text, no HTML, no markdown). ' +
           `Pick the best category slug from: ${input.categories.map((c) => `${c.slug} (${c.name})`).join(', ')}; null if none fits. ` +
-          'Set skip=true (with skip_reason) for adverts, promotions, horoscopes, lottery results or pages with no real news content.',
+          'Set skip=true (with skip_reason) for adverts, promotions, horoscopes, lottery results or pages with no real news content. ' +
+          'Duplicate check: `recent_headlines` were already published on our site. If the story reports the SAME specific news event as one of them ' +
+          '(same people/organisation, same action, same occasion — even if worded differently or in another language), set duplicate_of to that number ' +
+          'and return empty title and paragraphs. A follow-up with substantial new facts, or merely the same topic, is not a duplicate.',
         responseMimeType: 'application/json',
         responseSchema: SCHEMA,
         temperature: input.rewrite ? 0.7 : 0.1,
@@ -98,6 +111,9 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
   }
   if (!parsed?.success) throw new TranslateError('Gemini cavabı oxunmadı')
   const out = parsed.data
+  if (out.duplicate_of && input.recentTitles[out.duplicate_of - 1]) {
+    return { duplicateOf: input.recentTitles[out.duplicate_of - 1], title: '', html: '', category: null }
+  }
   if (out.skip) return null
 
   const paras = out.paragraphs.map((p) => plainText(p)).filter(Boolean)
@@ -108,6 +124,7 @@ export async function rewriteStory(input: RewriteInput): Promise<Rewritten | nul
     paras[0] = `${opening} ${first}`
   }
   return {
+    duplicateOf: null,
     title: plainText(out.title).replace(/\s+/g, ' ').trim(),
     html: paras.map((p) => `<p>${escape(p)}</p>`).join(''),
     category: out.category,
