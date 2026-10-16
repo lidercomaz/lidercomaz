@@ -71,4 +71,7 @@ export const localSource: DataSource = {
     return (await load(lang)).posts.filter(live).map(({ id, slug, category_ids, published_at }) => ({ id, slug, category_ids, published_at }))
   },
   async incrementViews() {},
+  async translation() {
+    return null
+  },
 }

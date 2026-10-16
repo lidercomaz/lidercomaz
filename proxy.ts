@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { isMobileUA, langFromHost } from './lib/request'
+import { SITE_URL } from './lib/site'
 
 export function proxy(req: NextRequest) {
   const url = req.nextUrl.clone()
@@ -13,6 +14,12 @@ export function proxy(req: NextRequest) {
   }
 
   const lang = langFromHost(host)
+
+  // One admin panel for both sites, served from the main domain.
+  if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
+    if (lang === 'ru') return NextResponse.redirect(new URL(`${url.pathname}${url.search}`, SITE_URL.az), 307)
+    return NextResponse.next()
+  }
 
   // Legacy DLE urls (old .htaccess) → new pages
   if (url.pathname === '/index.php') {
@@ -46,5 +53,5 @@ function rewriteTo(url: URL, pathname: string) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/|api/|img/|theme/|theme-m/|favicon.ico|icon-192.png|icon-512.png|apple-touch-icon.png).*)'],
+  matcher: ['/((?!_next/|api/|img/|theme/|theme-m/|favicon.ico|icon.svg|icon-192.png|icon-512.png|apple-touch-icon.png).*)'],
 }

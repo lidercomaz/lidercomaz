@@ -49,4 +49,6 @@ export interface DataSource {
   page(lang: Lang, slug: string): Promise<Page | null>
   sitemap(lang: Lang): Promise<Pick<PostCard, 'id' | 'slug' | 'category_ids' | 'published_at'>[]>
   incrementViews(lang: Lang, id: number): Promise<void>
+  /** The same story on the other-language site (linked via `group_id`), if published. */
+  translation(lang: Lang, id: number): Promise<Pick<PostCard, 'id' | 'slug' | 'category_ids'> | null>
 }

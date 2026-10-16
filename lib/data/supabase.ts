@@ -58,4 +58,13 @@ export const supabaseSource: DataSource = {
   async incrementViews(lang, id) {
     must(await sb().rpc('increment_views', { p_lang: lang, p_id: id }))
   },
+  async translation(lang, id) {
+    // `group_id` arrives with supabase/migrations/001_admin.sql; before that there are no links.
+    const { data: row, error } = await sb().from('posts').select('group_id').eq('lang', lang).eq('id', id).maybeSingle()
+    if (error || !row?.group_id) return null
+    return must<Pick<PostCard, 'id' | 'slug' | 'category_ids'> | null>(
+      await sb().from('posts').select('id,slug,category_ids').eq('lang', lang === 'az' ? 'ru' : 'az')
+        .eq('group_id', row.group_id).limit(1).maybeSingle(),
+    )
+  },
 }

@@ -48,7 +48,7 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API → Project URL |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → API → `anon` `public` açarı |
 
-   `SUPABASE_SERVICE_ROLE_KEY` hələlik Vercel-ə **əlavə etmə**. Bu açar yalnız admin panel qurulanda lazım olacaq və hər zaman **Sensitive** olmalıdır.
+   Admin panel üçün əlavə olaraq (hamısı **Sensitive**, yalnız Production): `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `ADMIN_API_TOKEN` və istəyə görə `ANTHROPIC_API_KEY` (avtomatik tərcümə). Bax: aşağıdakı "İdarəetmə paneli" bölməsi.
 4. **Deploy** düyməsinə bas. Bir neçə dəqiqədən sonra sayt `https://<layihə>.vercel.app` ünvanında açılacaq (AZ versiya).
 5. **Settings → Functions → Function Region**: Supabase layihənin regionu ilə eyni regionu seç (məsələn Frankfurt, `fra1`).
 
@@ -69,6 +69,29 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 - Vercel funksiyaları London regionunda işləyir (`vercel.json` → `lhr1`), Supabase də oradadır.
 - `NEXT_PUBLIC_SITE_URL_AZ` = `https://lider.com.az`, `NEXT_PUBLIC_SITE_URL_RU` = `https://ru.lider.com.az`.
 - Poçt: köhnə cPanel poçtu istifadə olunmur; yeni poçt Zoho Mail ilə qurulacaq (MX/SPF/DKIM qeydləri Cloudflare-ə yazılacaq).
+
+## İdarəetmə paneli
+
+- Ünvan: **https://lider.com.az/admin** (`ru.lider.com.az/admin` ora yönləndirilir). Bir panel hər iki saytı idarə edir.
+- Yeni xəbər hər iki saytda eyni anda dərc olunur: AZ və RU sütunlarını doldurun, ya da birini doldurub "tərcümə et" düyməsini basın. Boş qalan dil saxlayanda avtomatik tərcümə edilir (`ANTHROPIC_API_KEY` təyin olunubsa).
+- Dərc/yeniləmə/silmədən sonra hər iki sayt (desktop + mobil) dərhal yenilənir.
+- Şəkillər Supabase Storage-ə (`images/posts/YYYY-MM/…`) WebP kimi yazılır.
+- Bot (Gmail AI, Make, Zapier, n8n …) üçün API: panelin **Bot / API** səhifəsində təsvir olunub — `POST /api/admin/posts`, `Authorization: Bearer <ADMIN_API_TOKEN>`.
+
+### Bir dəfəlik: tərcümələri bir-birinə bağlamaq
+
+Supabase → SQL Editor-da [`supabase/migrations/001_admin.sql`](supabase/migrations/001_admin.sql) faylını işlədin. Bundan sonra AZ və RU versiyalar bir-birinə bağlanır: paneldə birlikdə redaktə olunur, saytdakı AZ/RU düyməsi birbaşa xəbərin tərcüməsinə keçir. Migration işləməyibsə də panel işləyir, sadəcə versiyalar bağlanmır.
+
+### Env dəyişənləri
+
+| Ad | Nə üçün |
+|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | Bazaya yazmaq (yalnız serverdə) |
+| `ADMIN_PASSWORD` | Panelə giriş şifrəsi. Dəyişəndə bütün sessiyalar bağlanır |
+| `ADMIN_API_TOKEN` | Bot açarı (ən azı 24 simvol) |
+| `ANTHROPIC_API_KEY` | Avtomatik AZ ↔ RU tərcümə (istəyə görə) |
+
+Dəyişdirmək: Vercel → Project → Settings → Environment Variables, sonra **Redeploy**.
 
 ## Təhlükəsizlik
 

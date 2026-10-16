@@ -37,6 +37,7 @@ create table if not exists posts (
   show_on_main  boolean     not null default true,
   views         int         not null default 0,
   keywords      text,
+  group_id      uuid,                    -- same value on the AZ and RU version of one story
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
   primary key (lang, id)
@@ -45,6 +46,8 @@ create table if not exists posts (
 create index if not exists posts_feed_idx     on posts (lang, published_at desc) where is_published;
 create index if not exists posts_category_idx on posts using gin (category_ids);
 create index if not exists posts_title_trgm   on posts using gin (title gin_trgm_ops);
+create index if not exists posts_group_idx    on posts (group_id) where group_id is not null;
+create index if not exists posts_admin_idx    on posts (lang, published_at desc);
 
 create or replace function posts_before_write() returns trigger
 language plpgsql as $$

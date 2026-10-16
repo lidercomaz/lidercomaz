@@ -23,8 +23,11 @@ export function useCounterpartPath() {
   const [path, setPath] = useState('/')
   const routerPath = usePathname() // re-run on client-side navigation
   useEffect(() => {
+    // A story linked to its translation carries <link rel="alternate" hreflang> (lib/post.ts postMetadata).
+    const own = document.documentElement.lang
+    const alt = [...document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]')].find((l) => l.hreflang !== own)
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reads window.location, unavailable during SSR
-    setPath(counterpartPath(window.location.pathname))
+    setPath(alt ? new URL(alt.href).pathname : counterpartPath(window.location.pathname))
   }, [routerPath])
   return path
 }

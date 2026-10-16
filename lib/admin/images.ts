@@ -1,0 +1,63 @@
+import 'server-only'
+import { randomBytes } from 'node:crypto'
+import sharp from 'sharp'
+import { adminDb } from './db'
+
+const BUCKET = 'images'
+const MAX_BYTES = 15 * 1024 * 1024
+const SIZES = { full: 1200, small: 480 }
+
+export class ImageError extends Error {}
+
+async function variants(buf: Buffer) {
+  let meta
+  try {
+    meta = await sharp(buf, { failOn: 'none' }).metadata()
+  } catch {
+    throw new ImageError('Şəkil oxunmadı (dəstəklənməyən format)')
+  }
+  if (!meta.width) throw new ImageError('Şəkil oxunmadı')
+  const render = (width: number) =>
+    sharp(buf, { failOn: 'none', animated: (meta.pages ?? 1) > 1 })
+      .rotate()
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 80, effort: 4 })
+      .toBuffer()
+  const [full, small] = await Promise.all([render(SIZES.full), render(SIZES.small)])
+  return { full, small }
+}
+
+async function put(key: string, body: Buffer) {
+  const { error } = await adminDb()
+    .storage.from(BUCKET)
+    .upload(key, body, { contentType: 'image/webp', cacheControl: '31536000', upsert: false })
+  if (error) throw new Error(`Storage: ${error.message}`)
+  return `/img/${key}`
+}
+
+/** Stores a picture as WebP (1200px article + 480px card) and returns the card url (`…-s.webp`) and full url. */
+export async function storeImage(buf: Buffer) {
+  if (buf.length > MAX_BYTES) throw new ImageError('Şəkil 15 MB-dan böyükdür')
+  const { full, small } = await variants(buf)
+  const now = new Date()
+  const key = `posts/${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}/${now.getTime()}-${randomBytes(4).toString('hex')}`
+  const [fullUrl, smallUrl] = await Promise.all([put(`${key}.webp`, full), put(`${key}-s.webp`, small)])
+  return { image: smallUrl, full: fullUrl }
+}
+
+/** Downloads a picture from a public http(s) url (bot input) and stores it. */
+export async function storeImageFromUrl(url: string) {
+  let u: URL
+  try {
+    u = new URL(url)
+  } catch {
+    throw new ImageError('Şəkil linki yanlışdır')
+  }
+  if (!/^https?:$/.test(u.protocol) || /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)/.test(u.hostname)) {
+    throw new ImageError('Şəkil linki yanlışdır')
+  }
+  const res = await fetch(u, { signal: AbortSignal.timeout(20_000), headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LiderBot/1.0)' } })
+  if (!res.ok) throw new ImageError(`Şəkil yüklənmədi (HTTP ${res.status})`)
+  if (Number(res.headers.get('content-length')) > MAX_BYTES) throw new ImageError('Şəkil 15 MB-dan böyükdür')
+  return storeImage(Buffer.from(await res.arrayBuffer()))
+}

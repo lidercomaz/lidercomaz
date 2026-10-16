@@ -1,18 +1,14 @@
-// Builds favicon/app icons from the Lider logo ("LI" mark on white).
+// Builds favicon/app icons from public/icon.svg (white Lider "LI" mark on the brand red).
 // Usage: node scripts/make-icons.mjs
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import sharp from 'sharp'
 
-const LOGO = 'public/theme/images/logo.png'
-const mark = await sharp(LOGO).extract({ left: 3, top: 4, width: 92, height: 92 }).png().toBuffer()
+const svg = await readFile('public/icon.svg')
 
-async function icon(size, padding = 0.16, radius = 0.2) {
-  const inner = Math.round(size * (1 - padding * 2))
-  const bg = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${size * radius}" fill="#fff"/></svg>`,
-  )
-  const glyph = await sharp(mark).resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer()
-  return sharp(bg).composite([{ input: glyph, gravity: 'center' }]).png().toBuffer()
+/** Square PNG; `square` drops the rounded corners (iOS applies its own mask). */
+async function icon(size, { square = false } = {}) {
+  const src = square ? Buffer.from(svg.toString().replace(/ rx="\d+"/, '')) : svg
+  return sharp(src, { density: Math.max(72, (72 * size) / 512 * 4) }).resize(size, size).png().toBuffer()
 }
 
 /** ICO container with embedded PNG images (supported by all current browsers). */
@@ -35,10 +31,9 @@ function ico(images) {
   return Buffer.concat([header, ...images.map((i) => i.png)])
 }
 
-const sizes = [16, 32, 48]
-const pngs = await Promise.all(sizes.map(async (size) => ({ size, png: await icon(size, 0.06, 0.12) })))
+const pngs = await Promise.all([16, 32, 48].map(async (size) => ({ size, png: await icon(size) })))
 await writeFile('public/favicon.ico', ico(pngs))
 await writeFile('public/icon-192.png', await icon(192))
 await writeFile('public/icon-512.png', await icon(512))
-await writeFile('public/apple-touch-icon.png', await icon(180, 0.14, 0))
+await writeFile('public/apple-touch-icon.png', await icon(180, { square: true }))
 console.log('icons written')
