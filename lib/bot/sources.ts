@@ -127,7 +127,50 @@ export async function recentItems(limit = 50) {
 
 type Outcome = { status: 'published' | 'draft' | 'skipped' | 'error'; post_lang?: Lang; post_id?: number; error?: string; title?: string }
 
-async function processItem(source: Source, item: FeedItem, categories: { id: number; slug: string; name: string }[]): Promise<Outcome> {
+/**
+ * Daily ceiling of new posts per site, so the database (Supabase free plan: 500 MB) lasts for years:
+ * a post takes ~5 KB with its indexes, so 30 posts a day ≈ 55 MB a year. Manual posts are never blocked,
+ * but they count towards the day's total.
+ */
+export function dailyLimit(lang: Lang) {
+  const raw = Number(process.env[lang === 'az' ? 'BOT_DAILY_LIMIT_AZ' : 'BOT_DAILY_LIMIT_RU'])
+  return Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : lang === 'az' ? 20 : 10
+}
+
+/** Start of today in Baku (UTC+4, no DST). */
+export function bakuDayStart() {
+  const now = Date.now() + 4 * 3600e3
+  return new Date(now - (now % 864e5) - 4 * 3600e3).toISOString()
+}
+
+export async function postsToday(lang: Lang) {
+  const { count, error } = await adminDb().from('posts').select('id', { count: 'exact', head: true }).eq('lang', lang).gte('created_at', bakuDayStart())
+  if (error) throw new Error(`Supabase: ${error.message}`)
+  return count ?? 0
+}
+
+type Quota = Record<Lang, number>
+
+const STOP = new Set(['və', 'ilə', 'bu', 'da', 'də', 'ki', 'üçün', 'olub', 'olunub', 'edib', 'etdi', 'bir', 'yeni', 'foto', 'video', 'yenilənib',
+  'и', 'в', 'во', 'на', 'с', 'со', 'по', 'о', 'об', 'для', 'не', 'что', 'как', 'из', 'к', 'от', 'за', 'фото', 'видео'])
+
+/** Headline → word stems (first 5 letters), for spotting the same story from two sources. */
+function stems(title: string) {
+  return new Set(
+    title.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, ' ').split(/\s+/)
+      .filter((w) => w.length > 1 && !STOP.has(w) && !/^\d{1,2}$/.test(w))
+      .map((w) => w.slice(0, 5)),
+  )
+}
+
+/** Same story: at least 3 shared stems and 60 % of all stems in common. */
+export function sameStory(a: Set<string>, b: Set<string>) {
+  let shared = 0
+  for (const w of a) if (b.has(w)) shared++
+  return shared >= 3 && shared / (a.size + b.size - shared) >= 0.6
+}
+
+async function processItem(source: Source, item: FeedItem, categories: { id: number; slug: string; name: string }[], quota: Quota): Promise<Outcome> {
   // Full text: from the feed when it carries it, otherwise from the article page.
   let title = item.title
   let paras = item.content ? paragraphs(item.content) : []
@@ -159,9 +202,13 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
       })
     : null
   const category = categories.find((c) => c.slug === story.category)?.id ?? source.category_id ?? 1
+  // The translated copy also needs room in the other site's daily quota.
+  const other: Lang = source.lang === 'az' ? 'ru' : 'az'
+  const crossPost = source.cross_post && canTranslate() && quota[other] > 0
+  if (crossPost) quota[other]--
   const saved = await createStory({
     [source.lang]: { title: story.title, body: story.html },
-    translate: source.cross_post && canTranslate(),
+    translate: crossPost,
     category_id: category,
     image: picture?.image ?? null,
     image_full: picture?.full ?? null,
@@ -203,6 +250,8 @@ export interface RunReport {
   skipped: number
   errors: number
   details: { source: string; title: string; status: string; error?: string }[]
+  /** Set when a site reached its daily limit during this run. */
+  limited: string | null
 }
 
 /**
@@ -212,7 +261,19 @@ export interface RunReport {
 export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: number; budgetMs?: number } = {}): Promise<RunReport> {
   if (!canTranslate()) throw new SetupError('Bot üçün GEMINI_API_KEY təyin edilməyib')
   const started = Date.now()
-  const report: RunReport = { sources: 0, published: 0, drafts: 0, skipped: 0, errors: 0, details: [] }
+  const report: RunReport = { sources: 0, published: 0, drafts: 0, skipped: 0, errors: 0, details: [], limited: null }
+  const [azToday, ruToday] = await Promise.all([postsToday('az'), postsToday('ru')])
+  // Headlines taken in the last 36 h by any source of the same language: the same story is published once.
+  const langOf = new Map(must<{ id: number; lang: Lang }[]>(await adminDb().from('sources').select('id,lang')).map((r) => [r.id, r.lang]))
+  const recentTitles: Record<Lang, Set<string>[]> = { az: [], ru: [] }
+  for (const r of must<{ source_id: number; title: string | null }[]>(
+    await adminDb().from('source_items').select('source_id,title').in('status', ['published', 'draft', 'processing'])
+      .gte('created_at', new Date(Date.now() - 36 * 3600e3).toISOString()),
+  )) {
+    const lang = langOf.get(r.source_id)
+    if (lang && r.title) recentTitles[lang].push(stems(r.title))
+  }
+  const quota: Quota = { az: dailyLimit('az') - azToday, ru: dailyLimit('ru') - ruToday }
 
   let q = adminDb().from('sources').select('*').order('last_checked_at', { ascending: true, nullsFirst: true })
   q = sourceId ? q.eq('id', sourceId) : q.eq('is_active', true)
@@ -232,13 +293,20 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
       const byUrl = new Map(rows.map((r) => [r.url, r]))
       // Today's stories only (last 24 h), newest first, up to the per-source count.
       const since = Date.now() - 864e5
+      if (quota[source.lang] <= 0) {
+        report.limited = `Günlük limit dolub (${source.lang.toUpperCase()}: ${dailyLimit(source.lang)} xəbər). Bot sabah davam edəcək.`
+        await adminDb().from('sources').update({ last_checked_at: new Date().toISOString(), last_error: null }).eq('id', source.id)
+        continue
+      }
       const fresh = feed
         .filter((i) => !i.publishedAt || !(Date.parse(i.publishedAt) < since))
         .filter((i) => !byUrl.has(i.url) || shouldRetry(byUrl.get(i.url)!))
-        .slice(0, source.max_per_run)
+        .slice(0, Math.min(source.max_per_run, quota[source.lang]))
       const categories = cats.map((c) => ({ id: c.id, slug: c.slug, name: source.lang === 'az' ? c.az : c.ru }))
 
       const handle = async (item: FeedItem) => {
+        if (quota[source.lang] <= 0) return
+        quota[source.lang]-- // reserved now so parallel workers cannot overshoot the day's limit
         // Claim the item first, so a parallel run skips it: a new row (unique url) or an atomic
         // status change of a row that failed temporarily.
         const prev = byUrl.get(item.url)
@@ -246,10 +314,22 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
           ? await adminDb().from('source_items').update({ status: 'processing', error: null, updated_at: new Date().toISOString() })
               .eq('id', prev.id).eq('status', prev.status).eq('updated_at', prev.updated_at).select('id').single()
           : await adminDb().from('source_items').insert({ source_id: source.id, url: item.url, title: item.title, status: 'processing' }).select('id').single()
-        if (claim.error || !claim.data) return
+        if (claim.error || !claim.data) {
+          quota[source.lang]++
+          return
+        }
+        const words = stems(item.title)
+        if (recentTitles[source.lang].some((t) => sameStory(t, words))) {
+          quota[source.lang]++
+          await adminDb().from('source_items').update({ status: 'skipped', error: 'Dublikat: bu xəbər başqa mənbədən artıq götürülüb', updated_at: new Date().toISOString() }).eq('id', claim.data.id)
+          report.skipped++
+          report.details.push({ source: source.name, title: item.title, status: 'skipped', error: 'Dublikat' })
+          return
+        }
+        recentTitles[source.lang].push(words)
         let outcome: Outcome
         try {
-          outcome = await processItem(source, item, categories)
+          outcome = await processItem(source, item, categories, quota)
         } catch (err) {
           const retry = err instanceof TranslateError && err.retryable
           outcome = { status: 'error', error: `${retry ? RETRY_MARK : ''}${err instanceof Error ? err.message : String(err)}` }
@@ -258,10 +338,11 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
           status: outcome.status,
           post_lang: outcome.post_lang ?? null,
           post_id: outcome.post_id ?? null,
-          title: outcome.title ?? item.title,
+          title: item.title,
           error: outcome.error?.slice(0, 1000) ?? null,
           updated_at: new Date().toISOString(),
         }).eq('id', claim.data.id)
+        if (outcome.status === 'skipped' || outcome.status === 'error') quota[source.lang]++ // nothing was stored
         if (outcome.status === 'published') report.published++
         else if (outcome.status === 'draft') report.drafts++
         else if (outcome.status === 'skipped') report.skipped++

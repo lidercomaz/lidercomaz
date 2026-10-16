@@ -9,7 +9,7 @@ import { formatTime, postPath } from '@/lib/format'
 import { articleHtml, isCanonical, loadPost, postMetadata } from '@/lib/post'
 import { SITE, isLang } from '@/lib/site'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 export function generateStaticParams() {
   return []

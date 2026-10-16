@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { categoryMetadata, renderCategory } from '@/components/CategoryView'
 
-export const revalidate = 60
+export const revalidate = 300
 
 // Rendered on first request, then cached (ISR) for `revalidate` seconds.
 export function generateStaticParams() {

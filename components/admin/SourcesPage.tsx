@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import type { Lang } from '@/lib/types'
 import { api, formatBaku, type AdminCategory } from './api'
+import { UsageCard } from './UsageCard'
 
 interface Source {
   id: number
@@ -41,6 +42,7 @@ interface RunReport {
   skipped: number
   errors: number
   details: { source: string; title: string; status: string; error?: string }[]
+  limited: string | null
 }
 
 const STATUS: Record<string, [string, string]> = {
@@ -67,6 +69,7 @@ export function SourcesPage() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [running, setRunning] = useState<number | 'all' | null>(null)
+  const [usageKey, setUsageKey] = useState(0)
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState({ name: '', site_url: '', category_id: 0, cross_post: false, auto_publish: true, rewrite: true })
 
@@ -130,8 +133,9 @@ export function SourcesPage() {
     setNotice(null)
     try {
       const r = await api<RunReport>('/api/admin/sources/run', { method: 'POST', json: { source_id: id } })
-      setNotice(`Yoxlanıldı: ${r.sources} mənbə · dərc olundu ${r.published} · qaralama ${r.drafts} · keçildi ${r.skipped} · xəta ${r.errors}`)
+      setNotice(`Yoxlanıldı: ${r.sources} mənbə · dərc olundu ${r.published} · qaralama ${r.drafts} · keçildi ${r.skipped} · xəta ${r.errors}${r.limited ? ` · ${r.limited}` : ''}`)
       load()
+      setUsageKey((k) => k + 1)
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -166,6 +170,8 @@ export function SourcesPage() {
 
       {error && <div className="notice err">{error}</div>}
       {notice && <div className="notice ok">{notice}</div>}
+
+      <UsageCard refreshKey={usageKey} />
 
       <form className="card card-pad" onSubmit={add} style={{ marginBottom: 20 }}>
         <h3 style={{ marginTop: 0 }}>Yeni mənbə ({lang.toUpperCase()} saytı üçün)</h3>

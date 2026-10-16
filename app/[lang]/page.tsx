@@ -8,7 +8,7 @@ import { data } from '@/lib/data'
 import { NO_IMAGE, categoryMap, formatDate, postPath } from '@/lib/format'
 import { SITE, isLang } from '@/lib/site'
 
-export const revalidate = 60
+export const revalidate = 300
 
 const PAGE_SIZE = 24
 

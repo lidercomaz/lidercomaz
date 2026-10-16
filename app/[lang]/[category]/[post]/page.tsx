@@ -7,7 +7,7 @@ import { formatDayMonth, formatTime, formatYear } from '@/lib/format'
 import { articleHtml, isCanonical, loadPost, postMetadata } from '@/lib/post'
 import { SITE_URL, isLang } from '@/lib/site'
 
-export const revalidate = 300
+export const revalidate = 3600
 
 // Rendered on first request, then cached (ISR) for `revalidate` seconds.
 export function generateStaticParams() {

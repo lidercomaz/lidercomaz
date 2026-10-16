@@ -1,6 +1,7 @@
 import 'server-only'
 import { randomUUID } from 'node:crypto'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { TAGS } from '../data'
 import { z } from 'zod'
 import { categoryMap, postPath } from '../format'
 import { LANGS, SITE_URL } from '../site'
@@ -182,8 +183,9 @@ async function publicUrl(row: { lang: Lang; id: number; slug: string; category_i
   return `${SITE_URL[row.lang]}${postPath(row, categoryMap(await categories(row.lang)))}`
 }
 
-/** Both sites (desktop + phone templates) re-render on their next request. */
+/** Both sites (desktop + phone templates) re-render on their next request, with fresh data. */
 export function revalidateSites() {
+  revalidateTag(TAGS.posts, { expire: 0 })
   revalidatePath('/[lang]', 'layout')
   revalidatePath('/m/[lang]', 'layout')
 }

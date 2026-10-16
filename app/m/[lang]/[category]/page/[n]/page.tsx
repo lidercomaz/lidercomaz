@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { categoryMetadata } from '@/components/CategoryView'
 import { renderMobileCategory } from '@/components/m/MCategoryView'
 
-export const revalidate = 60
+export const revalidate = 300
 
 export function generateStaticParams() {
   return []
