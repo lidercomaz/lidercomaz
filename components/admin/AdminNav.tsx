@@ -8,7 +8,8 @@ import { api } from './api'
 const LINKS = [
   { href: '/admin', label: 'Xəbərlər' },
   { href: '/admin/new', label: '+ Yeni xəbər' },
-  { href: '/admin/bot', label: 'Bot / API' },
+  { href: '/admin/sources', label: 'Mənbələr (bot)' },
+  { href: '/admin/bot', label: 'API' },
 ]
 
 export function AdminNav() {

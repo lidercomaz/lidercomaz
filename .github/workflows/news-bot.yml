@@ -1,0 +1,28 @@
+# Runs the news bot every 10 minutes (Vercel Hobby crons are limited to once a day).
+# Needs the repository secret LIDER_API_TOKEN = the ADMIN_API_TOKEN value set on Vercel.
+name: News bot
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: news-bot
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Import new stories
+        env:
+          TOKEN: ${{ secrets.LIDER_API_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "LIDER_API_TOKEN secret is not set"; exit 0; fi
+          code=$(curl -sS -o out.json -w '%{http_code}' --max-time 320 -X POST \
+            -H "Authorization: Bearer $TOKEN" https://lider.com.az/api/cron/import)
+          cat out.json; echo
+          echo "HTTP $code"
+          [ "$code" = "200" ] || [ "$code" = "503" ]

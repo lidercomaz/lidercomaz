@@ -3,6 +3,8 @@ import { isAuthorized } from './auth'
 import { ImageError } from './images'
 import { InputError } from './posts'
 import { TranslateError } from './translate'
+import { FetchError } from '../bot/fetch'
+import { SetupError } from '../bot/sources'
 
 const NO_STORE = { 'Cache-Control': 'no-store' }
 
@@ -15,7 +17,8 @@ export function adminRoute<C>(handler: (req: Request, ctx: C) => Promise<Respons
     try {
       return await handler(req, ctx)
     } catch (err) {
-      if (err instanceof InputError || err instanceof ImageError) return json({ error: err.message }, 400)
+      if (err instanceof InputError || err instanceof ImageError || err instanceof FetchError) return json({ error: err.message }, 400)
+      if (err instanceof SetupError) return json({ error: err.message }, 503)
       if (err instanceof TranslateError) return json({ error: err.message }, 502)
       console.error('[admin]', err)
       return json({ error: err instanceof Error ? err.message : 'Server xətası' }, 500)

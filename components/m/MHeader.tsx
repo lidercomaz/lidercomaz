@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useCounterpartPath } from '@/lib/lang-switch'
-import { SITE, SITE_URL, SOCIAL } from '@/lib/site'
+import { SITE, SITE_URL } from '@/lib/site'
 import type { Lang } from '@/lib/types'
 
 /** smartphone/main.tpl header, slide-out menu and search panel */
@@ -41,14 +41,6 @@ export function MHeader({ lang }: { lang: Lang }) {
               <a href={lang === 'ru' ? path : `${SITE_URL.ru}${path}`} className={lang === 'ru' ? 'active' : undefined}>RU</a>
             </div>
             <div className="menu-top">
-              <div className="m-social">
-                <ul>
-                  <li className="fb"><a href={SOCIAL.facebook} target="_blank" rel="noopener" aria-label="Facebook" /></li>
-                  <li className="tw"><a href={SOCIAL.twitter} target="_blank" rel="noopener" aria-label="Twitter" /></li>
-                  <li className="ins"><a href={SOCIAL.instagram} target="_blank" rel="noopener" aria-label="Instagram" /></li>
-                  <li className="yt"><a href={SOCIAL.youtube} target="_blank" rel="noopener" aria-label="YouTube" /></li>
-                </ul>
-              </div>
               <div className="menu-panel-close" onClick={close} />
             </div>
             <nav className="top-menu">

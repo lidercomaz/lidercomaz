@@ -6,6 +6,7 @@ import { api } from './api'
 
 export function LoginForm() {
   const router = useRouter()
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -15,7 +16,7 @@ export function LoginForm() {
     setBusy(true)
     setError(null)
     try {
-      await api('/api/admin/login', { method: 'POST', json: { password } })
+      await api('/api/admin/login', { method: 'POST', json: { email, password } })
       router.replace('/admin')
       router.refresh()
     } catch (err) {
@@ -31,10 +32,14 @@ export function LoginForm() {
         <p>İdarəetmə paneli</p>
         {error && <div className="notice err">{error}</div>}
         <label className="field">
-          <span>Şifrə</span>
-          <input className="input" type="password" autoComplete="current-password" autoFocus required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <span>E-poçt</span>
+          <input className="input" type="email" autoComplete="username" autoFocus required value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
-        <button className="btn primary" disabled={busy || !password}>{busy ? 'Yoxlanılır…' : 'Daxil ol'}</button>
+        <label className="field">
+          <span>Şifrə</span>
+          <input className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
+        <button className="btn primary" disabled={busy || !email || !password}>{busy ? 'Yoxlanılır…' : 'Daxil ol'}</button>
       </form>
     </div>
   )

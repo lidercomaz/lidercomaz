@@ -30,8 +30,9 @@ export default async function RootLayout({ children, params }: LayoutProps<'/[la
   for (const href of FONTS) preload(href, { as: 'font', type: 'font/woff2', crossOrigin: '' })
 
   return (
-    <html lang={SITE[lang].htmlLang}>
+    <html lang={SITE[lang].htmlLang} translate="no">
       <head>
+        <meta name="google" content="notranslate" />
         {CSS.map((f) => (
           <link key={f} rel="stylesheet" href={`/theme/css/${f}.css`} precedence="default" />
         ))}

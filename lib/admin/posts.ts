@@ -138,7 +138,7 @@ async function completeLanguages(input: StoryInput, need: Lang[]) {
     const from = fields[other(lang)]
     if (!from || !input.translate) continue
     if (!canTranslate()) {
-      warnings.push(`${lang.toUpperCase()} versiyası yaradılmadı: avtomatik tərcümə qoşulmayıb (ANTHROPIC_API_KEY)`)
+      warnings.push(`${lang.toUpperCase()} versiyası yaradılmadı: avtomatik tərcümə qoşulmayıb (GEMINI_API_KEY)`)
       continue
     }
     const t = await translatePost(other(lang), lang, { title: from.title, title_extra: from.title_extra ?? null, body: cleanHtml(toHtml(from.body)) })

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useCounterpartPath } from '@/lib/lang-switch'
-import { SITE, SITE_URL, SOCIAL } from '@/lib/site'
+import { SITE, SITE_URL } from '@/lib/site'
 import type { Lang } from '@/lib/types'
 
 /** header.tpl */
@@ -88,12 +88,6 @@ export function Header({ lang }: { lang: Lang }) {
                     </ul>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div className="h-social">
-              <ul>
-                <li className="facebook"><a href={SOCIAL.facebook} target="_blank" rel="noopener" aria-label="Facebook" /></li>
-                <li className="instagram"><a href={SOCIAL.instagram} target="_blank" rel="noopener" aria-label="Instagram" /></li>
               </ul>
             </div>
           </nav>

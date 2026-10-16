@@ -9,8 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.135.0",
+    "@google/genai": "^2.30.0",
+    "@mozilla/readability": "^0.6.0",
     "@supabase/supabase-js": "^2.117.3",
+    "fast-xml-parser": "^5.11.2",
+    "linkedom": "^0.18.13",
     "next": "16.4.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",

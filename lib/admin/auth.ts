@@ -5,12 +5,15 @@ import { cookies } from 'next/headers'
 export const SESSION_COOKIE = 'lider_admin'
 const SESSION_DAYS = 14
 
-/** Sessions are signed with a key derived from the password, so changing ADMIN_PASSWORD logs everyone out. */
+const adminEmail = () => process.env.ADMIN_EMAIL?.trim().toLowerCase()
+
+/** Sessions are signed with a key derived from the credentials, so changing ADMIN_EMAIL/ADMIN_PASSWORD logs everyone out. */
 function signingKey() {
+  const email = adminEmail()
   const password = process.env.ADMIN_PASSWORD
   const pepper = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!password || !pepper) return null
-  return createHash('sha256').update(`lider-admin\0${password}\0${pepper}`).digest()
+  if (!email || !password || !pepper) return null
+  return createHash('sha256').update(`lider-admin\0${email}\0${password}\0${pepper}`).digest()
 }
 
 function safeEqual(a: string, b: string) {
@@ -23,14 +26,21 @@ export function isConfigured() {
   return signingKey() !== null
 }
 
-export function checkPassword(input: string) {
-  const password = process.env.ADMIN_PASSWORD
-  return Boolean(password) && safeEqual(createHash('sha256').update(input).digest('hex'), createHash('sha256').update(password!).digest('hex'))
+const digest = (s: string) => createHash('sha256').update(s).digest('hex')
+
+export function checkCredentials(email: string, password: string) {
+  const expectedEmail = adminEmail()
+  const expectedPassword = process.env.ADMIN_PASSWORD
+  if (!expectedEmail || !expectedPassword) return false
+  // Both comparisons always run, so timing does not reveal which one failed.
+  const emailOk = safeEqual(digest(email.trim().toLowerCase()), digest(expectedEmail))
+  const passwordOk = safeEqual(digest(password), digest(expectedPassword))
+  return emailOk && passwordOk
 }
 
 export function createSession() {
   const key = signingKey()
-  if (!key) throw new Error('ADMIN_PASSWORD is not set')
+  if (!key) throw new Error('ADMIN_EMAIL / ADMIN_PASSWORD are not set')
   const exp = Date.now() + SESSION_DAYS * 864e5
   const sig = createHmac('sha256', key).update(String(exp)).digest('base64url')
   return { value: `${exp}.${sig}`, maxAge: SESSION_DAYS * 86400 }

@@ -35,7 +35,7 @@ export default function BotDocs() {
       </p>
       <p>
         Vəziyyət: API açarı {tokenSet ? <span className="badge ok">təyin edilib</span> : <span className="badge red">təyin edilməyib</span>} · Avtomatik tərcümə{' '}
-        {translate ? <span className="badge ok">aktivdir</span> : <span className="badge red">qoşulmayıb (ANTHROPIC_API_KEY)</span>}
+        {translate ? <span className="badge ok">aktivdir</span> : <span className="badge red">qoşulmayıb (GEMINI_API_KEY)</span>}
       </p>
 
       <h2>Sorğu</h2>
