@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { resolve } from '@/components/CategoryView'
+import { ContactSection } from '@/components/ContactSection'
 import { LoadMore } from '@/components/LoadMore'
 import { data } from '@/lib/data'
 import { categoryMap, postPath } from '@/lib/format'
@@ -15,6 +16,7 @@ export async function renderMobileCategory(lang: string, segment: string, pageNo
   if (!r) notFound()
 
   if (r.kind === 'page') {
+    if (r.page.slug === 'contact') return <div className="post static"><ContactSection lang={lang} title={r.page.title} /></div>
     return (
       <article className="post static">
         <h1 className="title">{r.page.title}</h1>

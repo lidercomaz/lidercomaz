@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ContactSection } from '@/components/ContactSection'
 import { ContentPage } from '@/components/ContentPage'
 import { LoadMore } from '@/components/LoadMore'
 import { NewsItem } from '@/components/NewsItem'
@@ -43,10 +44,14 @@ export async function renderCategory(lang: string, category: string, pageNo: num
   if (r.kind === 'page') {
     return (
       <ContentPage lang={lang}>
-        <article className="static-page">
-          <h1>{r.page.title}</h1>
-          <div dangerouslySetInnerHTML={{ __html: r.page.body }} />
-        </article>
+        {r.page.slug === 'contact' ? (
+          <ContactSection lang={lang} title={r.page.title} />
+        ) : (
+          <article className="static-page">
+            <h1>{r.page.title}</h1>
+            <div dangerouslySetInnerHTML={{ __html: r.page.body }} />
+          </article>
+        )}
       </ContentPage>
     )
   }

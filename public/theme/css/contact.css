@@ -1,0 +1,25 @@
+/* Contact page (desktop and phone templates). */
+.contact-page .contact-intro {margin-bottom: 16px;}
+.contact-list {list-style: none !important; padding: 0 !important; margin: 0 0 26px; display: grid; gap: 10px;}
+.contact-list li {display: flex; gap: 12px; align-items: baseline; padding: 12px 14px; border: 1px solid #e6e8eb; border-radius: 8px; background: #fafbfc;}
+.contact-list li span {min-width: 90px; font-weight: bold; color: #2b2a29;}
+.contact-list a {color: #c30d23; word-break: break-all;}
+.contact-page h2 {font-size: 20px; font-weight: bold; margin: 0 0 12px;}
+.contact-form {display: grid; gap: 14px;}
+.contact-form .contact-row {display: grid; grid-template-columns: 1fr 1fr; gap: 14px;}
+.contact-form label {display: grid; gap: 6px; font-size: 14px; font-weight: 600; color: #4b5563;}
+.contact-form input, .contact-form textarea {width: 100%; box-sizing: border-box; border: 1px solid #d5d9df; border-radius: 8px; padding: 10px 12px; font: inherit; font-weight: normal; color: #1f2328; background: #fff;}
+.contact-form textarea {resize: vertical; min-height: 140px;}
+.contact-form input:focus, .contact-form textarea:focus {outline: 2px solid rgba(195, 13, 35, .2); border-color: #c30d23;}
+.contact-form button {justify-self: start; background: #c30d23; color: #fff; border: 0; border-radius: 8px; padding: 12px 28px; font-weight: bold; font-size: 15px; cursor: pointer;}
+.contact-form button:hover {background: #9e0a1c;}
+.contact-form button:disabled {opacity: .6; cursor: default;}
+.contact-hp {position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0;}
+.contact-notice {padding: 12px 14px; border-radius: 8px; font-size: 15px;}
+.contact-notice.ok {background: #e3f4ea; color: #1a7f4b;}
+.contact-notice.err {background: #fde6e8; color: #9e0a1c;}
+@media (max-width: 700px) {
+  .contact-form .contact-row {grid-template-columns: 1fr;}
+  .contact-form button {justify-self: stretch;}
+  .contact-list li {flex-direction: column; gap: 2px;}
+}

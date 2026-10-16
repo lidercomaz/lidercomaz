@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 
 const FONTS = ['/theme-m/fonts/subset-Montserrat-Regular.woff2', '/theme-m/fonts/subset-Montserrat-Medium.woff2']
 
-const CSS = ['/theme-m/css/style.css', '/theme-m/css/responsive.css', '/theme-m/css/custom.css', '/theme/css/footer.css']
+const CSS = ['/theme-m/css/style.css', '/theme-m/css/responsive.css', '/theme-m/css/custom.css', '/theme/css/footer.css', '/theme/css/contact.css']
 
 export default async function MobileLayout({ children, params }: LayoutProps<'/m/[lang]'>) {
   const { lang } = await params

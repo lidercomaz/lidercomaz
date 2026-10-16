@@ -18,6 +18,31 @@ interface MenuItem {
   label: string
 }
 
+interface ContactText {
+  intro: string
+  emailLabel: string
+  phoneLabel: string
+  addressLabel: string
+  address: string
+  formTitle: string
+  name: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+  send: string
+  sending: string
+  sent: string
+  failed: string
+}
+
+/** Contact details shown on /contact.html (both sites). */
+export const CONTACT = {
+  email: 'info@lider.com.az',
+  phone: '(+99470) 598 00 35',
+  phoneHref: 'tel:+994705980035',
+}
+
 interface SiteText {
   htmlLang: string
   title: string
@@ -40,6 +65,7 @@ interface SiteText {
   adPlaceholder: string | null
   /** ainsyndication slot for the desktop side banners (original main.tpl), null = no ads */
   sideAdSlot: string | null
+  contact: ContactText
   footer: {
     about: string
     sectionsTitle: string
@@ -101,7 +127,7 @@ export const SITE: Record<Lang, SiteText> = {
     footerInfo: [
       'Baş redaktor: Səyarə Heydərova',
       'Tel: (+99470) 598 00 35',
-      'E-mail: sayyara.heyderova@mail.ru',
+      'E-mail: info@lider.com.az',
       'Ünvan: Bakı şəh, Xətai ray, X.Məmmədov küç, ev 21, m 27',
     ],
     searchPlaceholder: 'Saytda axtar...',
@@ -115,6 +141,23 @@ export const SITE: Record<Lang, SiteText> = {
     notFound: 'Səhifə tapılmadı',
     adPlaceholder: null,
     sideAdSlot: '9236',
+    contact: {
+      intro: 'Xəbər, təklif, şikayət və ya əməkdaşlıq üçün bizə yazın.',
+      emailLabel: 'E-poçt',
+      phoneLabel: 'Telefon',
+      addressLabel: 'Ünvan',
+      address: 'Bakı şəh., Xətai ray., X.Məmmədov küç., ev 21, m. 27',
+      formTitle: 'Bizə yazın',
+      name: 'Adınız',
+      email: 'E-poçtunuz',
+      phone: 'Telefon (istəyə görə)',
+      subject: 'Mövzu (istəyə görə)',
+      message: 'Mesajınız',
+      send: 'Göndər',
+      sending: 'Göndərilir…',
+      sent: 'Mesajınız göndərildi. Təşəkkür edirik, tezliklə cavab verəcəyik.',
+      failed: 'Mesaj göndərilmədi. Bir az sonra yenidən cəhd edin və ya info@lider.com.az ünvanına yazın.',
+    },
     footer: {
       about: 'Lider.com.az – müstəqil xəbər portalı. Azərbaycan və dünyada baş verən siyasi, iqtisadi, sosial, mədəni və idman hadisələrini operativ və qərəzsiz şəkildə oxuculara çatdırır.',
       sectionsTitle: 'Bölmələr',
@@ -205,6 +248,7 @@ export const SITE: Record<Lang, SiteText> = {
     footerInfo: [
       'Главный редактор: Сайяра Гейдарова',
       'Телефон: (+99470) 598 00 35',
+      'E-mail: info@lider.com.az',
       'Адрес: город Баку, Хатаинский район, улица Х.Мамедова, дом 21, м 27',
     ],
     searchPlaceholder: 'Поиск по сайту...',
@@ -218,6 +262,23 @@ export const SITE: Record<Lang, SiteText> = {
     notFound: 'Страница не найдена',
     adPlaceholder: null,
     sideAdSlot: null,
+    contact: {
+      intro: 'Новости, предложения, жалобы и вопросы сотрудничества — напишите нам.',
+      emailLabel: 'E-mail',
+      phoneLabel: 'Телефон',
+      addressLabel: 'Адрес',
+      address: 'г. Баку, Хатаинский р-н, ул. Х.Мамедова, д. 21, кв. 27',
+      formTitle: 'Напишите нам',
+      name: 'Ваше имя',
+      email: 'Ваш e-mail',
+      phone: 'Телефон (необязательно)',
+      subject: 'Тема (необязательно)',
+      message: 'Сообщение',
+      send: 'Отправить',
+      sending: 'Отправляется…',
+      sent: 'Сообщение отправлено. Спасибо, мы скоро ответим.',
+      failed: 'Сообщение не отправлено. Попробуйте позже или напишите на info@lider.com.az.',
+    },
     footer: {
       about: 'Lider.com.az – независимый новостной портал. Оперативно и беспристрастно освещает политические, экономические, социальные, культурные и спортивные события в Азербайджане и мире.',
       sectionsTitle: 'Разделы',

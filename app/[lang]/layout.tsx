@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 const FONTS = ['/theme/fonts/subset-SFProDisplay-Regular.woff2', '/theme/fonts/subset-AlumniSans-SemiBold.woff2']
 
-const CSS = ['engine', 'fonts', 'responsive', 'styles', 'custom', 'enhance', 'footer']
+const CSS = ['engine', 'fonts', 'styles', 'responsive', 'custom', 'enhance', 'footer', 'contact']
 
 export default async function RootLayout({ children, params }: LayoutProps<'/[lang]'>) {
   const { lang } = await params

@@ -9,6 +9,7 @@ const LINKS = [
   { href: '/admin', label: 'Xəbərlər' },
   { href: '/admin/new', label: '+ Yeni xəbər' },
   { href: '/admin/sources', label: 'Mənbələr (bot)' },
+  { href: '/admin/messages', label: 'Mesajlar' },
   { href: '/admin/bot', label: 'API' },
 ]
 
