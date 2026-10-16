@@ -35,8 +35,52 @@ async function put(key: string, body: Buffer) {
   return `/img/${key}`
 }
 
-/** Stores a picture as WebP (1200px article + 480px card) and returns the card url (`…-s.webp`) and full url. */
+interface ImgbbResponse {
+  success?: boolean
+  data?: { url: string; display_url?: string }
+  error?: { message?: string }
+}
+
+/** Uploads one file to imgbb (https://api.imgbb.com) and returns its direct url (i.ibb.co/…). */
+async function putImgbb(body: Buffer, name: string) {
+  const key = process.env.IMGBB_API_KEY!
+  for (let attempt = 0; ; attempt++) {
+    const form = new FormData()
+    form.append('key', key)
+    form.append('name', name)
+    form.append('image', new Blob([new Uint8Array(body)], { type: 'image/webp' }), `${name}.webp`)
+    try {
+      const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: form, signal: AbortSignal.timeout(30_000) })
+      const json = (await res.json().catch(() => ({}))) as ImgbbResponse
+      if (res.ok && json.success && json.data?.url) return json.data.url
+      if (res.status === 400 && /key/i.test(json.error?.message ?? '')) throw new ImageError('IMGBB_API_KEY yanlışdır')
+      if (attempt >= 1 || (res.status < 500 && res.status !== 429)) {
+        throw new ImageError(`imgbb şəkli qəbul etmədi: ${json.error?.message ?? `HTTP ${res.status}`}`)
+      }
+    } catch (err) {
+      if (err instanceof ImageError) throw err
+      if (attempt >= 1) throw new ImageError(`imgbb-yə yükləmə alınmadı: ${(err as Error).message}`)
+    }
+    await new Promise((r) => setTimeout(r, 2000))
+  }
+}
+
+/**
+ * Stores a picture as WebP (1200px article + 480px card) on imgbb and returns the card url and the full url.
+ * New pictures never go to Supabase (its free storage is kept for data); the migrated archive stays in
+ * the Supabase "images" bucket and is served as /img/….
+ */
 export async function storeImage(buf: Buffer) {
+  if (!process.env.IMGBB_API_KEY) throw new ImageError('Şəkil yükləmək üçün IMGBB_API_KEY təyin edilməyib (Vercel → Environment Variables)')
+  if (buf.length > MAX_BYTES) throw new ImageError('Şəkil 15 MB-dan böyükdür')
+  const { full, small } = await variants(buf)
+  const name = `lider-${Date.now()}-${randomBytes(3).toString('hex')}`
+  const [fullUrl, smallUrl] = await Promise.all([putImgbb(full, name), putImgbb(small, `${name}-s`)])
+  return { image: smallUrl, full: fullUrl }
+}
+
+/** Old Supabase Storage upload, kept only for maintenance scripts. */
+export async function storeImageInSupabase(buf: Buffer) {
   if (buf.length > MAX_BYTES) throw new ImageError('Şəkil 15 MB-dan böyükdür')
   const { full, small } = await variants(buf)
   const now = new Date()

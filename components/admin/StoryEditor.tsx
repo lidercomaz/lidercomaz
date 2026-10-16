@@ -22,6 +22,7 @@ interface LangState {
 interface Shared {
   category_id: number
   image: string | null
+  imageFull: string | null
   published: string // datetime-local (Baku), '' = now
   is_published: boolean
   show_on_main: boolean
@@ -36,6 +37,7 @@ interface StoryRow {
   body: string
   excerpt: string | null
   image: string | null
+  image_full?: string | null
   category_ids: number[]
   published_at: string
   is_published: boolean
@@ -61,7 +63,7 @@ export function StoryEditor({ edit }: { edit?: { lang: Lang; id: number } }) {
   const [cats, setCats] = useState<AdminCategory[]>([])
   const [canTranslate, setCanTranslate] = useState(false)
   const [loading, setLoading] = useState(Boolean(edit))
-  const [shared, setShared] = useState<Shared>({ category_id: 1, image: null, published: '', is_published: true, show_on_main: true, is_pinned: false })
+  const [shared, setShared] = useState<Shared>({ category_id: 1, image: null, imageFull: null, published: '', is_published: true, show_on_main: true, is_pinned: false })
   const [langs, setLangs] = useState<Record<Lang, LangState>>({ az: emptyLang(), ru: emptyLang() })
   const [ids, setIds] = useState<Record<Lang, number | null>>({ az: null, ru: null })
   const [editorKey, setEditorKey] = useState<Record<Lang, number>>({ az: 0, ru: 0 })
@@ -82,6 +84,7 @@ export function StoryEditor({ edit }: { edit?: { lang: Lang; id: number } }) {
         setShared({
           category_id: main.category_ids[0] ?? 1,
           image: main.image,
+          imageFull: main.image_full ?? null,
           published: toLocalInput(main.published_at),
           is_published: main.is_published,
           show_on_main: main.show_on_main,
@@ -154,6 +157,7 @@ export function StoryEditor({ edit }: { edit?: { lang: Lang; id: number } }) {
       translate: autoTranslate && canTranslate,
       category_id: shared.category_id,
       image: shared.image,
+      image_full: shared.imageFull,
       published_at: shared.published ? fromLocalInput(shared.published) : edit ? undefined : new Date().toISOString(),
       is_published: shared.is_published,
       show_on_main: shared.show_on_main,
@@ -294,7 +298,7 @@ export function StoryEditor({ edit }: { edit?: { lang: Lang; id: number } }) {
 
           <div className="card card-pad">
             <h3>Şəkil</h3>
-            <ImageField value={shared.image} onChange={(image) => setSh({ image })} />
+            <ImageField value={shared.image} full={shared.imageFull} onChange={(image, imageFull) => setSh({ image, imageFull })} />
           </div>
 
           <div className="card card-pad">
@@ -329,7 +333,7 @@ export function StoryEditor({ edit }: { edit?: { lang: Lang; id: number } }) {
   )
 }
 
-function ImageField({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+function ImageField({ value, full, onChange }: { value: string | null; full: string | null; onChange: (image: string | null, full: string | null) => void }) {
   const input = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [over, setOver] = useState(false)
@@ -341,7 +345,8 @@ function ImageField({ value, onChange }: { value: string | null; onChange: (v: s
     setBusy(true)
     setErr(null)
     try {
-      onChange((await uploadImage(f)).image)
+      const r = await uploadImage(f)
+      onChange(r.image, r.full)
     } catch (e) {
       setErr((e as Error).message)
     } finally {
@@ -355,7 +360,8 @@ function ImageField({ value, onChange }: { value: string | null; onChange: (v: s
     setBusy(true)
     setErr(null)
     try {
-      onChange((await api<{ image: string }>('/api/admin/upload', { method: 'POST', json: { url } })).image)
+      const r = await api<{ image: string; full: string }>('/api/admin/upload', { method: 'POST', json: { url } })
+      onChange(r.image, r.full)
     } catch (e) {
       setErr((e as Error).message)
     } finally {
@@ -368,8 +374,8 @@ function ImageField({ value, onChange }: { value: string | null; onChange: (v: s
       {err && <div className="notice err">{err}</div>}
       {value ? (
         <div className="img-preview">
-          <img src={value.replace(/-s\.webp$/, '.webp')} alt="" />
-          <button type="button" className="btn small" onClick={() => onChange(null)}>Sil</button>
+          <img src={full ?? value.replace(/-s\.webp$/, '.webp')} alt="" />
+          <button type="button" className="btn small" onClick={() => onChange(null, null)}>Sil</button>
         </div>
       ) : (
         <div
@@ -386,7 +392,7 @@ function ImageField({ value, onChange }: { value: string | null; onChange: (v: s
         <button type="button" className="btn small" disabled={busy} onClick={() => input.current?.click()}>{value ? 'Dəyiş' : 'Fayl seç'}</button>
         <button type="button" className="btn small" disabled={busy} onClick={fromUrl}>Linkdən</button>
       </div>
-      <p className="hint" style={{ marginBottom: 0 }}>Şəkil xəbərin əvvəlində və kartlarda göstərilir. Avtomatik WebP-yə çevrilir.</p>
+      <p className="hint" style={{ marginBottom: 0 }}>Şəkil xəbərin əvvəlində və kartlarda göstərilir. WebP-yə çevrilib imgbb-yə yüklənir.</p>
       <input ref={input} type="file" accept="image/*" hidden onChange={(e) => { upload(e.target.files?.[0]); e.target.value = '' }} />
     </>
   )

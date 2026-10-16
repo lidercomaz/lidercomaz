@@ -90,16 +90,27 @@ export function makeExcerpt(html: string, max = 300) {
   return cut.slice(0, Math.max(cut.lastIndexOf(' '), max - 40)).trim()
 }
 
-/** Full-size picture for a stored card thumbnail (`…-s.webp` → `….webp`). */
+/** Full-size picture for a stored card thumbnail (`…-s.webp` → `….webp`; same url for other hosts). */
 export const fullImage = (image: string) => image.replace(/-s\.webp$/, '.webp')
 
+const LEAD = /^\s*<img\b[^>]*\bsrc="([^"]+)"[^>]*>/i
+
 /** The lead picture is stored as the first element of the body (as in the migrated posts). */
-export function withLeadImage(body: string, image: string | null, alt: string) {
-  return image ? `<img src="${escape(fullImage(image))}" alt="${escape(alt)}" loading="lazy">${body}` : body
+export function leadImageSrc(body: string) {
+  return LEAD.exec(body)?.[1]?.replace(/&amp;/g, '&') ?? null
 }
 
+/**
+ * Body with the lead picture in front. `full` is the article-size url; without it the url is derived from
+ * the card (`…-s.webp` → `….webp`), which holds for pictures in Supabase Storage.
+ */
+export function withLeadImage(body: string, image: string | null, alt: string, full?: string | null) {
+  return image ? `<img src="${escape(full || fullImage(image))}" alt="${escape(alt)}" loading="lazy">${body}` : body
+}
+
+/** Body without the lead picture (the editor shows the picture separately). */
 export function withoutLeadImage(body: string, image: string | null) {
   if (!image) return body
-  const m = /^\s*<img\b[^>]*\bsrc="([^"]+)"[^>]*>/i.exec(body)
-  return m && m[1] === fullImage(image) ? body.slice(m[0].length) : body
+  const m = LEAD.exec(body)
+  return m ? body.slice(m[0].length) : body
 }

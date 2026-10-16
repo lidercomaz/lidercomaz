@@ -46,10 +46,16 @@ export async function postMetadata(lang: Lang, segment: string): Promise<Metadat
       title: post.title,
       description: post.excerpt ?? undefined,
       url: path,
-      images: [post.image ? post.image.replace(/-s\.webp$/, '.webp') : '/theme/images/logo.png'],
+      images: [ogImage(post)],
       publishedTime: post.published_at,
     },
   }
+}
+
+/** Article-size lead picture (first element of the body), else the card picture, else the logo. */
+function ogImage(post: { body: string; image: string | null }) {
+  const lead = /^\s*<img\b[^>]*\bsrc="([^"]+)"/i.exec(post.body)?.[1]
+  return lead?.replace(/&amp;/g, '&') ?? post.image ?? '/theme/images/logo.png'
 }
 
 /** The lead image is above the fold: load it immediately, keep the rest lazy. */

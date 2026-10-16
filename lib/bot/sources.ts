@@ -150,16 +150,21 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
   })
   if (!story) return { status: 'skipped', error: 'Xəbər deyil (reklam/boş səhifə)' }
 
-  let card: string | null = null
-  if (source.with_image && image) {
-    card = await storeImageFromUrl(image).then((r) => r.image, () => null)
-  }
+  // Pictures go to imgbb; a failed upload publishes the story without a picture.
+  let pictureError: string | null = null
+  const picture = source.with_image && image
+    ? await storeImageFromUrl(image).catch((e: Error) => {
+        pictureError = `Şəkil yüklənmədi: ${e.message}`
+        return null
+      })
+    : null
   const category = categories.find((c) => c.slug === story.category)?.id ?? source.category_id ?? 1
   const saved = await createStory({
     [source.lang]: { title: story.title, body: story.html },
     translate: source.cross_post && canTranslate(),
     category_id: category,
-    image: card,
+    image: picture?.image ?? null,
+    image_full: picture?.full ?? null,
     is_published: source.auto_publish,
     show_on_main: true,
     is_pinned: false,
@@ -171,7 +176,7 @@ async function processItem(source: Source, item: FeedItem, categories: { id: num
     post_lang: source.lang,
     post_id: own?.id,
     title: story.title,
-    error: saved.warnings.join('; ') || undefined,
+    error: [pictureError, ...saved.warnings].filter(Boolean).join('; ') || undefined,
   }
 }
 
@@ -282,5 +287,7 @@ export async function runImport({ sourceId, budgetMs = 230_000 }: { sourceId?: n
     }
     await adminDb().from('sources').update({ last_checked_at: new Date().toISOString(), last_error: sourceError }).eq('id', source.id)
   }
+  // Keep the bot's bookkeeping small: feeds only carry recent stories, so a week of history is enough.
+  await adminDb().from('source_items').delete().lt('created_at', new Date(Date.now() - 7 * 864e5).toISOString())
   return report
 }

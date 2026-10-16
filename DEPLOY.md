@@ -75,7 +75,7 @@ Deploy-u yalnız Supabase-ə idxal bitdikdən **sonra** et. Ana səhifə build z
 - Ünvan: **https://lider.com.az/admin** (`ru.lider.com.az/admin` ora yönləndirilir). Bir panel hər iki saytı idarə edir.
 - Yeni xəbər hər iki saytda eyni anda dərc olunur: AZ və RU sütunlarını doldurun, ya da birini doldurub "tərcümə et" düyməsini basın. Boş qalan dil saxlayanda avtomatik tərcümə edilir (`GEMINI_API_KEY` təyin olunubsa).
 - Dərc/yeniləmə/silmədən sonra hər iki sayt (desktop + mobil) dərhal yenilənir.
-- Şəkillər Supabase Storage-ə (`images/posts/YYYY-MM/…`) WebP kimi yazılır.
+- Yeni şəkillər (panel, redaktor, bot) WebP-yə çevrilib **imgbb**-yə yüklənir (`IMGBB_API_KEY`). Supabase-ə şəkil yazılmır; köhnə arxiv şəkilləri Supabase-də qalır (`/img/…`).
 - Bot (Gmail AI, Make, Zapier, n8n …) üçün API: panelin **Bot / API** səhifəsində təsvir olunub — `POST /api/admin/posts`, `Authorization: Bearer <ADMIN_API_TOKEN>`.
 
 ### Xəbər botu (Mənbələr)
@@ -98,6 +98,7 @@ Supabase → SQL Editor-da [`supabase/migrations/001_admin.sql`](supabase/migrat
 | `ADMIN_EMAIL` | Panelə giriş e-poçtu |
 | `ADMIN_PASSWORD` | Panelə giriş şifrəsi. E-poçt və ya şifrə dəyişəndə bütün sessiyalar bağlanır |
 | `ADMIN_API_TOKEN` | Bot açarı (ən azı 24 simvol) |
+| `IMGBB_API_KEY` | Yeni şəkillərin imgbb-yə yüklənməsi (vacib) |
 | `GEMINI_API_KEY` | Avtomatik AZ ↔ RU tərcümə, Google Gemini (istəyə görə) |
 | `GEMINI_MODEL` | Gemini modeli (default `gemini-flash-latest`) |
 

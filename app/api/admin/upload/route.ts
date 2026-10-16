@@ -1,7 +1,7 @@
 import { adminRoute, json } from '@/lib/admin/http'
 import { storeImage, storeImageFromUrl } from '@/lib/admin/images'
 
-/** multipart `file`, or JSON `{ "url": "https://…" }` → `{ image: "/img/…-s.webp", full: "/img/….webp" }` */
+/** multipart `file`, or JSON `{ "url": "https://…" }` → imgbb urls `{ image: card 480px, full: article 1200px }` */
 export const POST = adminRoute(async (req) => {
   if (req.headers.get('content-type')?.includes('application/json')) {
     const { url } = await req.json().catch(() => ({}))

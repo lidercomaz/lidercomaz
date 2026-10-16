@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { categoryMap, postPath } from '../format'
 import { LANGS, SITE_URL } from '../site'
 import type { Category, Lang } from '../types'
-import { cleanHtml, makeExcerpt, slugify, toHtml, withLeadImage, withoutLeadImage } from './content'
+import { cleanHtml, leadImageSrc, makeExcerpt, slugify, toHtml, withLeadImage, withoutLeadImage } from './content'
 import { adminDb } from './db'
 import { storeImageFromUrl } from './images'
 import { canTranslate, translatePost } from './translate'
@@ -31,8 +31,10 @@ export const StoryInput = z.object({
   category_id: z.number().int().positive().optional(),
   /** Category id or slug ("siyaset"), convenient for bots. */
   category: z.union([z.number().int().positive(), z.string().trim().min(1)]).optional(),
-  /** Card picture already stored via /api/admin/upload (`/img/…-s.webp`) or any https url; null removes it. */
+  /** Card picture already stored via /api/admin/upload (imgbb) or any https url; null removes it. */
   image: z.string().trim().max(1000).nullish(),
+  /** Article-size version of `image` (imgbb keeps the two sizes at unrelated urls). */
+  image_full: z.string().trim().max(1000).nullish(),
   /** Public picture url to download and store (bots). */
   image_url: z.string().trim().url().optional(),
   published_at: z.string().datetime({ offset: true }).optional(),
@@ -107,16 +109,22 @@ async function resolveCategory(input: StoryInput, fallback?: number) {
   return found.id
 }
 
-async function resolveImage(input: StoryInput) {
-  if (input.image_url) return (await storeImageFromUrl(input.image_url)).image
+const IMAGE_URL = /^(\/img\/[a-zA-Z0-9/_.-]+|https:\/\/\S+)$/
+
+/** Card picture + article-size picture; undefined = leave as it is, null = remove. */
+async function resolveImage(input: StoryInput): Promise<{ image: string; full: string | null } | null | undefined> {
+  if (input.image_url) {
+    const r = await storeImageFromUrl(input.image_url)
+    return { image: r.image, full: r.full }
+  }
   if (input.image === undefined) return undefined
   if (input.image === null || input.image === '') return null
-  if (!/^(\/img\/[a-zA-Z0-9/_.-]+|https:\/\/\S+)$/.test(input.image)) throw new InputError('Şəkil linki yanlışdır')
-  return input.image
+  if (!IMAGE_URL.test(input.image) || (input.image_full && !IMAGE_URL.test(input.image_full))) throw new InputError('Şəkil linki yanlışdır')
+  return { image: input.image, full: input.image_full || null }
 }
 
 /** Story fields for one language → table columns. */
-function langColumns(f: LangFields, image: string | null) {
+function langColumns(f: LangFields, image: string | null, full?: string | null) {
   const body = cleanHtml(toHtml(f.body))
   return {
     title: f.title,
@@ -125,7 +133,7 @@ function langColumns(f: LangFields, image: string | null) {
     slug: slugify(f.title),
     excerpt: f.excerpt || makeExcerpt(body) || null,
     keywords: f.keywords || null,
-    body: withLeadImage(body, image, f.title),
+    body: withLeadImage(body, image, f.title, full),
   }
 }
 
@@ -190,7 +198,7 @@ export async function createStory(input: StoryInput): Promise<SaveResult> {
   const group_id = randomUUID()
   const shared = {
     category_ids: [categoryId!],
-    image: image ?? null,
+    image: image?.image ?? null,
     author: input.author ?? 'lider',
     published_at: input.published_at ?? new Date().toISOString(),
     is_published: input.is_published ?? true,
@@ -202,7 +210,7 @@ export async function createStory(input: StoryInput): Promise<SaveResult> {
   for (const lang of LANGS) {
     const f = fields[lang]
     if (!f) continue
-    const row = await insertRow({ lang, ...shared, ...langColumns(f, shared.image) })
+    const row = await insertRow({ lang, ...shared, ...langColumns(f, shared.image, image?.full) })
     result.posts[lang] = { id: row.id, url: await publicUrl(row) }
   }
   revalidateSites()
@@ -225,7 +233,7 @@ export async function getStory(lang: Lang, id: number) {
   const row = await getRow(lang, id)
   if (!row) return null
   const pair = await linked(row)
-  const strip = (r: AdminRow | null) => (r ? { ...r, body: withoutLeadImage(r.body, r.image) } : null)
+  const strip = (r: AdminRow | null) => (r ? { ...r, body: withoutLeadImage(r.body, r.image), image_full: r.image ? leadImageSrc(r.body) : null } : null)
   return { [lang]: strip(row), [other(lang)]: strip(pair), linkSupported: await groupSupported() } as {
     az: AdminRow | null
     ru: AdminRow | null
@@ -245,11 +253,13 @@ export async function updateStory(lang: Lang, id: number, input: StoryInput): Pr
 
   const shared: Record<string, unknown> = {}
   if (categoryId !== undefined) shared.category_ids = [categoryId]
-  if (image !== undefined) shared.image = image
+  if (image !== undefined) shared.image = image?.image ?? null
   for (const k of ['published_at', 'is_published', 'show_on_main', 'is_pinned', 'author'] as const) {
     if (input[k] !== undefined) shared[k] = input[k]
   }
-  const nextImage = image !== undefined ? image : row.image
+  const nextImage = image !== undefined ? image?.image ?? null : row.image
+  // When the picture is kept, keep the article-size url that is already in the body.
+  const nextFull = image !== undefined ? image?.full ?? null : row.image ? leadImageSrc(row.body) : null
 
   const rows: Partial<Record<Lang, AdminRow | null>> = { [lang]: row, [other(lang)]: pair }
   const need = LANGS.filter((l) => !rows[l])
@@ -262,8 +272,8 @@ export async function updateStory(lang: Lang, id: number, input: StoryInput): Pr
     const f = fields[l]
     if (existing) {
       const patch: Record<string, unknown> = { ...shared }
-      if (f) Object.assign(patch, langColumns(f, nextImage))
-      else if (image !== undefined) patch.body = withLeadImage(withoutLeadImage(existing.body, existing.image), nextImage, existing.title)
+      if (f) Object.assign(patch, langColumns(f, nextImage, nextFull))
+      else if (image !== undefined) patch.body = withLeadImage(withoutLeadImage(existing.body, existing.image), nextImage, existing.title, nextFull)
       if (group_id && !existing.group_id) patch.group_id = group_id
       const saved = await updateRow(l, existing.id, patch)
       result.posts[l] = { id: saved.id, url: await publicUrl(saved) }
@@ -280,7 +290,7 @@ export async function updateStory(lang: Lang, id: number, input: StoryInput): Pr
         is_pinned: base.is_pinned,
         ...shared,
         group_id,
-        ...langColumns(f, nextImage),
+        ...langColumns(f, nextImage, nextFull),
       })
       result.posts[l] = { id: saved.id, url: await publicUrl(saved) }
     }
